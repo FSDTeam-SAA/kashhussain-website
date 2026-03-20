@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+body{
+  @apply bg-white font-inter
+}
+
+.bg_color{
+  background-color: #F4FFF4
+}
+
+.h_underline {
+  text-decoration-line: underline;
+  text-underline-offset: 8px;   /* smaller default for mobile */
+  text-decoration-thickness: 3px;
+  padding-bottom: .75rem;
+}
+
+@media (min-width: 768px) {
+  .h_underline {
+    text-underline-offset: 8px;
+    text-decoration-thickness: 4px;
+    padding-bottom: 1.5rem;
+  }
+}
+
+@layer base {
+  :root {
+    /* Primary Base (#1E3A8A) */
+    --primary: 222 64% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Primary Shades */
+    --primary-light: 222 64% 45%;
+    --primary-lighter: 222 64% 60%;
+    --primary-dark: 222 64% 25%;
+    --primary-darker: 222 64% 18%;
+
+    /* Hover & Ring */
+    --primary-hover: 222 64% 28%;
+    --ring: 222 64% 33%;
+  }
+
+  .dark {
+    /* Dark Mode */
+    --primary: 222 64% 55%;
+    --primary-foreground: 0 0% 0%;
+
+    --primary-light: 222 64% 65%;
+    --primary-lighter: 222 64% 75%;
+    --primary-dark: 222 64% 45%;
+    --primary-darker: 222 64% 35%;
+
+    --primary-hover: 222 64% 60%;
+    --ring: 222 64% 55%;
+  }
+}
