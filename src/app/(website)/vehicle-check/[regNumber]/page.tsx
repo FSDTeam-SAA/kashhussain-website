@@ -1,14 +1,19 @@
+import PricingSection from "./_components/pricing-plans";
 import VehicleCheckDetails from "./_components/VehicleCheckDetails";
 
-
 type PageProps = {
-  params: Promise<{
+  params: {
     regNumber: string;
-  }>;
+  };
 };
 
-export default async function VehicleCheckPage({ params }: PageProps) {
-  const { regNumber } = await params;
+export default function VehicleCheckPage({ params }: PageProps) {
+  const regNumber = decodeURIComponent(params.regNumber);
 
-  return <VehicleCheckDetails regNumber={decodeURIComponent(regNumber)} />;
+  return (
+    <div>
+      <VehicleCheckDetails regNumber={regNumber} />
+      <PricingSection />
+    </div>
+  );
 }
