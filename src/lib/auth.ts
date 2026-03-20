@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
 
           console.log("response", response);
 
-          if (!res.ok || !response?.status) {
+          if (!res.ok || !response?.success) {
             throw new Error(response?.message || "Login failed");
           }
           //   if (response.data.user.role === "USER") {
@@ -55,8 +55,7 @@ export const authOptions: NextAuthOptions = {
 
           return {
             id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            fullName: user.fullName,
             email: user.email,
             role: user.role,
             profileImage: user.profileImage,
@@ -80,8 +79,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }: { token: JWT; user?: any }) {
       if (user) {
         token.id = user.id;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
+        token.fullName = user.fullName;
         token.email = user.email;
         token.role = user.role;
         token.profileImage = user.profileImage;
@@ -94,7 +92,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }: { session: any; token: JWT }) {
       session.user = {
         id: token.id,
-        firstName: token.firstName,
+        fullName: token.fullName,
         lastName: token.lastName,
         email: token.email,
         role: token.role,

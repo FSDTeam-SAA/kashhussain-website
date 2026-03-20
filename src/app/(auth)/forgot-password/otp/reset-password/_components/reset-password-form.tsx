@@ -23,6 +23,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import SuccessfullyApprovedModal from "@/components/modals/successfully-approved-modal";
 
 const formSchema = z
   .object({
@@ -43,6 +44,7 @@ const formSchema = z
 const ResetPasswordForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [confirmShowPassword, setConfirmShowPassword] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const decodedEmail = decodeURIComponent(email || "")
@@ -71,12 +73,17 @@ const ResetPasswordForm = () => {
       return res.json();
     },
     onSuccess: (data)=>{
-      if(!data?.status){
+      if(!data?.success){
         toast.error(data?.message || "Something went wrong");
         return
       }else{
-        toast.success(data?.message || "Password reset successfully");
-        router.push("/login")
+        // toast.success(data?.message || "Password reset successfully");
+        // router.push("/login")
+
+         setIsOpen(true);
+        setTimeout(() => {
+          router.push("/login");
+        }, 5000);
       }
     }
   })
@@ -216,6 +223,16 @@ const ResetPasswordForm = () => {
           </div>
         </form>
       </Form>
+
+       {/* successfully modal  */}
+      {isOpen && (
+        <SuccessfullyApprovedModal
+          open={isOpen}
+          onOpenChange={() => setIsOpen(false)}
+          title="Password Changed Successfully!"
+          desc="Your account is ready to use. Your will be redirected to the Home page in a few seconds.."
+        />
+      )}
     </div>
 
   );

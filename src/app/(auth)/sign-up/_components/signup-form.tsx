@@ -72,7 +72,7 @@ const SignupForm = () => {
 const { mutate, isPending } = useMutation({
   mutationKey: ["signup"],
 
-  mutationFn: async (values: {name:string, email:string, password:string}) => {
+  mutationFn: async (values: {fullName:string, email:string, password:string}) => {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
       {
@@ -94,7 +94,7 @@ const { mutate, isPending } = useMutation({
   },
 
   onSuccess: (data) => {
-    if (!data?.status) {
+    if (!data?.success) {
       toast.error(data?.message || "Something went wrong!");
       return;
     }
@@ -116,7 +116,7 @@ const { mutate, isPending } = useMutation({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     const payload = {
-      name: values.fullName,
+      fullName: values.fullName,
       email : values.email,
       password : values.password
     }

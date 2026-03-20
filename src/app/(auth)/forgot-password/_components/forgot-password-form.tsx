@@ -40,7 +40,7 @@ const ForgotPasswordForm = () => {
   const {mutate, isPending} = useMutation({
     mutationKey: ["forgot-password"],
     mutationFn : async (values:{email:string})=>{
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/forget-password`,{
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/forgot-password`,{
         method : "POST",
         headers: {
           "Content-Type" : "application/json"
@@ -50,7 +50,7 @@ const ForgotPasswordForm = () => {
       return res.json();
     },
     onSuccess: (data, email)=>{
-      if(!data?.status){
+      if(!data?.success){
         toast?.error(data?.message || "Something went wrong");
         return
       }
