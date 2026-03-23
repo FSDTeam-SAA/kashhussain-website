@@ -1,8 +1,13 @@
 import React from 'react'
+import SectionHeader from './_components/SectionHeader'
+import VehicleHistoryContent from './_components/VehicleHistoryContent'
 
 const TermsAndContionPage = () => {
   return (
-    <div>TermsAndContionPage</div>
+    <div>
+      <SectionHeader/>
+      <VehicleHistoryContent/>
+    </div>
   )
 }
 
