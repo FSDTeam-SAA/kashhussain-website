@@ -1,8 +1,11 @@
 import React from 'react'
+import ChangePasswordForm from './_components/change-password-form'
 
 const ChangePasswordPage = () => {
   return (
-    <div>ChangePasswordPage</div>
+    <div>
+      <ChangePasswordForm/>
+    </div>
   )
 }
 

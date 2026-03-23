@@ -30,9 +30,9 @@ export default function PaymentSuccessContainer() {
     router.push("/");
   };
 
-  const handleGoProducts = () => {
-    router.push("/products");
-  };
+  // const handleGoProducts = () => {
+  //   router.push("/products");
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4">
@@ -57,7 +57,7 @@ export default function PaymentSuccessContainer() {
           <div className="mt-2 space-y-1 text-[13px] text-[#475569]">
             <p>
               <span className="font-medium">Status :</span>{" "}
-              <span className="text-green-600 font-semibold">Completed</span>
+              <span className="text-primary font-semibold">Completed</span>
             </p>
             <p>
               <span className="font-medium">Payment Method :</span> Stripe
@@ -73,13 +73,13 @@ export default function PaymentSuccessContainer() {
             Continue Browsing
           </Button>
 
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleGoProducts}
             className="w-full h-[48px] text-sm font-semibold rounded-[12px]"
           >
             View Products
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>
