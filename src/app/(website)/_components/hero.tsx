@@ -33,27 +33,22 @@ export default function HeroSection() {
 
       <div className="relative z-10 flex min-h-screen items-center justify-center">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto flex max-w-4xl flex-col items-center py-24 text-center md:py-32">
-            <h1 className="font-sora text-3xl font-bold leading-tight text-white md:text-4xl lg:text-[44px]">
+          <div className="flex flex-col items-center py-24 text-center md:py-32">
+            <h1 className="font-sora text-3xl md:text-4xl lg:text-[40px] font-bold leading-normal text-[#F8FAFC] ">
               Quick, free vehicle checks for any UK car.
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/90 md:text-base">
+            <p className="mt-2 text-sm md:text-base leading-normal text-[#F4F4F4] font-normal">
               Get comprehensive vehicle history reports before you buy. Trusted by
               thousands of UK car buyers.
             </p>
 
-            <p className="mt-2 max-w-xl text-xs leading-5 text-white/85 md:text-sm">
-              Includes MOT status & history, road tax, mileage, and up-to-date
-              DVLA registration info
-            </p>
-
-            {/* Input area */}
-            <div className="mt-8 w-full max-w-[620px]">
-              <div className="overflow-hidden rounded-md border-2 border-[#1A1A1A] bg-[#F6C433] shadow-[0_12px_30px_rgba(0,0,0,0.25)]">
+             {/* Input area */}
+            <div className="mt-6 w-full max-w-[620px]">
+              <div className="overflow-hidden rounded-[6px] border-2 border-black bg-[#FBBF24] shadow-[0px_25px_50px_-12px_#00000080]">
                 <div className="flex h-[64px] w-full items-stretch sm:h-[72px]">
                   {/* GB */}
-                  <div className="flex w-[60px] shrink-0 items-center justify-center bg-[#233B8E] text-lg font-bold text-white sm:w-[70px] sm:text-xl">
+                  <div className="flex w-[44px] shrink-0 items-center justify-center bg-[#1D4ED8] text-lg font-bold text-white sm:text-xl">
                     GB
                   </div>
 
@@ -66,7 +61,7 @@ export default function HeroSection() {
                       if (e.key === "Enter") handleSearch();
                     }}
                     placeholder="ENTER REG"
-                    className="h-full w-full bg-[#F6C433] px-4 text-center text-2xl font-extrabold uppercase tracking-wide text-black outline-none placeholder:text-black sm:px-6 sm:text-4xl"
+                    className="h-full w-full bg-[#FBBF24] px-2 text-left text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wide leading-normal text-black outline-none placeholder:text-black"
                   />
                 </div>
               </div>
@@ -84,6 +79,13 @@ export default function HeroSection() {
                 </div>
               )}
             </div>
+
+            <p className="mt-2 text-sm md:text-base leading-normal text-[#F4F4F4] font-normal">
+              Includes MOT status & history, road tax, mileage, and up-to-date
+              DVLA <br /> registration info
+            </p>
+
+           
           </div>
         </div>
       </div>

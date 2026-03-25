@@ -32,12 +32,12 @@ const Footer = () => {
             </h4>
             <ul>
               <Link href="/">
-                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline hover:text-primary">
+                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline">
                   Home
                 </li>
               </Link>
               <Link href="/contact-us">
-                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline hover:text-primary py-2">
+                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline py-2">
                   Contact Us
                 </li>
               </Link>
@@ -49,12 +49,12 @@ const Footer = () => {
             </h4>
             <ul>
               <Link href="/terms-and-condition">
-                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline hover:text-primary">
+                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline">
                   Terms & Condition
                 </li>
               </Link>
               <Link href="/privacy-policy">
-                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline hover:text-primary py-2">
+                <li className="text-sm md:text-base font-normal text-white leading-[120%] hover:underline py-2">
                   Privacy Policy
                 </li>
               </Link>
