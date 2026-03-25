@@ -1,95 +1,218 @@
 "use client";
 
-
 import Link from "next/link";
+import { CheckCircle2, Clock3, ShieldAlert } from "lucide-react";
+
+import RegistrationPlate from "./RegistrationPlate";
+import VehicleCheckExtraInformation from "./VehicleCheckExtraInformation";
+import type { VehicleCheckData } from "./vehicle-check.types";
 
 type Props = {
-  regNumber?: string;
+  regNumber: string;
+  vehicle?: VehicleCheckData | null;
+  errorMessage?: string | null;
 };
 
-export default function VehicleCheckDetails({ regNumber }: Props) {
-  const vehicleName = "Aston Martin";
+const formatDate = (value?: string) => {
+  if (!value) {
+    return "Not available";
+  }
 
-  console.log(regNumber)
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+};
+
+const getDaysLeft = (value?: string) => {
+  if (!value) {
+    return null;
+  }
+
+  const expiry = new Date(value);
+  const today = new Date();
+
+  expiry.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  if (Number.isNaN(expiry.getTime())) {
+    return null;
+  }
+
+  return Math.ceil((expiry.getTime() - today.getTime()) / 86400000);
+};
+
+const formatDaysLeft = (value?: string) => {
+  const daysLeft = getDaysLeft(value);
+
+  if (daysLeft === null) {
+    return "Expiry unavailable";
+  }
+
+  if (daysLeft < 0) {
+    return `Expired ${Math.abs(daysLeft)} days ago`;
+  }
+
+  if (daysLeft === 0) {
+    return "Expires today";
+  }
+
+  if (daysLeft === 1) {
+    return "1 day left";
+  }
+
+  return `${daysLeft} days left`;
+};
+
+function StatusCard({
+  title,
+  expiryDate,
+}: {
+  title: string;
+  expiryDate?: string;
+}) {
+  const daysLeft = getDaysLeft(expiryDate);
+  const isHealthy = daysLeft === null ? false : daysLeft >= 0;
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
-     <video
-  autoPlay
-  muted
-  loop
-  playsInline
-  className="absolute inset-0 h-full w-full object-cover"
->
-  <source src="/assets/videos/home_hero.mp4" type="video/mp4" />
-</video>
+    <div className="rounded-[28px] bg-white p-6 text-left shadow-[0_20px_60px_rgba(15,23,42,0.14)]">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#111827]">
+            {title}
+          </p>
+          <p className="mt-3 text-sm text-[#4B5563]">
+            Expires: {formatDate(expiryDate)}
+          </p>
+          <p
+            className={`mt-2 text-sm font-semibold ${
+              isHealthy ? "text-[#16A34A]" : "text-[#DC2626]"
+            }`}
+          >
+            {formatDaysLeft(expiryDate)}
+          </p>
+        </div>
 
-      <div className="absolute inset-0 bg-black/45" />
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-full ${
+            isHealthy ? "bg-[#DCFCE7] text-[#16A34A]" : "bg-[#FEE2E2] text-[#DC2626]"
+          }`}
+        >
+          {isHealthy ? (
+            <CheckCircle2 className="h-5 w-5" />
+          ) : (
+            <ShieldAlert className="h-5 w-5" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      <div className="relative z-10 flex min-h-screen items-center justify-center">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center text-white">
-            {/* Reg plate */}
-            <div className="mx-auto flex h-[72px] w-full max-w-[330px] overflow-hidden rounded-md border-2 border-[#1A1A1A] bg-[#F6C433] shadow-[0_12px_30px_rgba(0,0,0,0.25)] sm:h-[88px] sm:max-w-[420px]">
-              <div className="flex w-[60px] items-center justify-center bg-[#233B8E] text-xl font-bold text-white sm:w-[80px] sm:text-2xl">
-                GB
+export default function VehicleCheckDetails({
+  regNumber,
+  vehicle,
+  errorMessage,
+}: Props) {
+  const heroSection = vehicle?.heroSection;
+  const vehicleName = heroSection?.vehicleName || "Vehicle details unavailable";
+  const normalizedReg = heroSection?.registrationNumber || regNumber;
+
+  return (
+    <>
+      <section className="relative min-h-screen overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/assets/videos/home_hero.mp4" type="video/mp4" />
+        </video>
+
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.52)_45%,rgba(2,6,23,0.78)_100%)]" />
+
+        <div className="relative z-10 flex min-h-screen items-center justify-center py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-5xl text-center text-white">
+              <div className="flex justify-center">
+                <RegistrationPlate value={normalizedReg} className="mx-auto h-[76px] max-w-[360px] sm:h-[90px] sm:max-w-[460px]" />
               </div>
-              <div className="flex flex-1 items-center justify-center px-4 text-3xl font-extrabold uppercase tracking-wide text-black sm:text-5xl">
-                {regNumber}
-              </div>
-            </div>
 
-            {/* Title */}
-            <h2 className="mt-8 text-3xl font-bold sm:text-5xl">{vehicleName}</h2>
+              <h2 className="mt-8 text-3xl font-bold sm:text-5xl">{vehicleName}</h2>
 
-            <p className="mt-3 text-sm text-white/90 sm:text-base">
-              Not The Right Vehicle?{" "}
-              <Link href="/" className="font-semibold text-[#3B82F6] underline underline-offset-4">
-                Check again
-              </Link>
-            </p>
+              <p className="mt-3 text-sm text-white/90 sm:text-base">
+                Not The Right Vehicle?{" "}
+                <Link
+                  href="/"
+                  className="font-semibold text-[#7DD3FC] underline underline-offset-4"
+                >
+                  Check again
+                </Link>
+              </p>
 
-            {/* Info boxes */}
-            <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div className="rounded-2xl bg-white p-6 text-left shadow-xl">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-bold uppercase text-[#111827]">Tax</p>
-                    <p className="mt-3 text-sm text-[#4B5563]">
-                      Expires: 01 May 2026
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-[#16A34A]">
-                      47 days left
-                    </p>
-                  </div>
-
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
-                    ✓
+              {errorMessage ? (
+                <div className="mx-auto mt-10 max-w-2xl rounded-[28px] border border-[#FECACA] bg-white/95 p-6 text-left shadow-[0_20px_60px_rgba(15,23,42,0.14)]">
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-full bg-[#FEE2E2] text-[#DC2626]">
+                      <ShieldAlert className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#111827]">
+                        We couldn&apos;t load this vehicle check
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-[#4B5563]">{errorMessage}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <StatusCard title="Tax" expiryDate={heroSection?.tax?.expiryDate} />
+                  <StatusCard title="MOT" expiryDate={heroSection?.mot?.expiryDate} />
+                </div>
+              )}
 
-              <div className="rounded-2xl bg-white p-6 text-left shadow-xl">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-bold uppercase text-[#111827]">MOT</p>
-                    <p className="mt-3 text-sm text-[#4B5563]">
-                      Expires: 06 May 2026
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-[#16A34A]">
-                      53 days left
-                    </p>
-                  </div>
+              <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-4 rounded-[32px] border border-white/15 bg-white/10 p-5 text-left backdrop-blur-sm sm:grid-cols-3">
+                <div className="rounded-[24px] bg-white/10 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/65">
+                    Registration
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-white">{normalizedReg}</p>
+                </div>
 
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
-                    ✓
-                  </div>
+                <div className="rounded-[24px] bg-white/10 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/65">
+                    Last checked
+                  </p>
+                  <p className="mt-2 flex items-center gap-2 text-lg font-semibold text-white">
+                    <Clock3 className="h-4 w-4" />
+                    {formatDate(vehicle?.updatedAt)}
+                  </p>
+                </div>
+
+                <div className="rounded-[24px] bg-white/10 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/65">
+                    Vehicle type
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {vehicle?.vehicleDetails?.modelVariant || "Not available"}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {vehicle ? <VehicleCheckExtraInformation vehicle={vehicle} /> : null}
+    </>
   );
 }
