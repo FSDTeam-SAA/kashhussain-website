@@ -33,16 +33,16 @@ const steps: StepItem[] = [
 
 export default function HowItWorksSection() {
   return (
-    <section className="w-full bg-[#f7f7f7] py-14 md:py-20">
+    <section className="w-full bg-white py-14 md:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="mx-auto mb-12 max-w-2xl text-center">
-          <h2 className="text-3xl font-bold text-[#111827] sm:text-4xl">
-            How It <span className="text-blue-600">Works</span>
+        <div className="mb-12 text-center">
+          <h2 className="font-sora text-3xl md:text-4xl lg:text-4xl font-bold text-[#111827] leading-normal">
+            How It <span className="text-primary">Works</span>
           </h2>
 
-          <p className="mt-3 text-sm text-gray-500 sm:text-base">
+          <p className="mt-2 text-sm md:text-base text-[#6B7280] leading-normal font-normal">
             A simple, step-by-step process to help families find, connect with,
             and book trusted assisted living facilities with ease.
           </p>
