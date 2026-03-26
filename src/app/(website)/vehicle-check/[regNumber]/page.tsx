@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 
-import PricingSection from "./_components/pricing-plans";
 import VehicleCheckDetails from "./_components/VehicleCheckDetails";
 import type { VehicleCheckResponse } from "./_components/vehicle-check.types";
 
@@ -64,13 +63,12 @@ export default async function VehicleCheckPage({ params }: PageProps) {
   const { data, errorMessage } = await getVehicleCheck(regNumber);
 
   return (
-    <div>
+    <div >
       <VehicleCheckDetails
         regNumber={regNumber}
         vehicle={data}
         errorMessage={errorMessage}
       />
-      <PricingSection />
     </div>
   );
 }
