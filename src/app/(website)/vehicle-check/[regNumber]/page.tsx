@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 
 import VehicleCheckDetails from "./_components/VehicleCheckDetails";
 import type { VehicleCheckResponse } from "./_components/vehicle-check.types";
+import PricingSection from "./_components/pricing-plans";
 
 type PageProps = {
   params: {
@@ -21,7 +22,7 @@ async function getVehicleCheck(regNumber: string) {
   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api/v1";
 
   try {
-    const response = await fetch(`${baseUrl}/check-car`, {
+    const response = await fetch(`${baseUrl}/check-car/free`, {
       method: "POST",
       headers: {
         accept: "*/*",
@@ -62,6 +63,8 @@ export default async function VehicleCheckPage({ params }: PageProps) {
   const regNumber = decodeURIComponent(params.regNumber);
   const { data, errorMessage } = await getVehicleCheck(regNumber);
 
+  console.log("data : ----------------------", data)
+
   return (
     <div >
       <VehicleCheckDetails
@@ -69,6 +72,7 @@ export default async function VehicleCheckPage({ params }: PageProps) {
         vehicle={data}
         errorMessage={errorMessage}
       />
+      <PricingSection/>
     </div>
   );
 }
