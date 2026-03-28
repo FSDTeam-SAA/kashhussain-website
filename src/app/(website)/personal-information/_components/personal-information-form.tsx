@@ -19,25 +19,25 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import PersonalInfoSkeleton from "./PersonalInfoSkeleton";
-import { UserProfileApiResponse } from "./personal-info-data-type";
+import { UserApiResponse } from "./personal-info-data-type";
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "First Name must be at least 2 characters.",
+  fullName: z.string().min(2, {
+    message: "Full Name must be at least 2 characters.",
   }),
   email: z.string().min(2, {
     message: "Email must be at least 2 characters.",
   }),
-  phone: z.string().min(2, {
+  phoneNumber: z.string().min(2, {
     message: "Phone Number must be at least 2 characters.",
   }),
   country: z.string().min(2, {
     message: "Country must be at least 2 characters.",
   }),
-  cityState: z.string().min(2, {
+  city: z.string().min(2, {
     message: "City be at least 2 characters.",
   }),
-  roadArea: z.string().min(2, {
+  address: z.string().min(2, {
     message: "Address must be at least 2 characters.",
   }),
 });
@@ -48,11 +48,11 @@ const PersonalInformationForm = () => {
   const { data: session } = useSession();
   const token = (session?.user as { accessToken?: string })?.accessToken;
 
-  const { data, isLoading } = useQuery<UserProfileApiResponse>({
+  const { data, isLoading } = useQuery<UserApiResponse>({
     queryKey: ["user-profile"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/me`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -68,12 +68,12 @@ const PersonalInformationForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      fullName: "",
       email: "",
-      phone: "",
+      phoneNumber: "",
       country: "",
-      cityState: "",
-      roadArea: "",
+      city: "",
+      address: "",
     },
   });
 
@@ -82,44 +82,41 @@ const PersonalInformationForm = () => {
       const user = data.data;
 
       form.reset({
-        name: user?.name ?? "",
+        fullName: user?.fullName ?? "",
         email: user.email ?? "",
-        phone: user.phone ?? "",
-        country: user?.address?.country ?? "",
-        cityState: user?.address?.cityState ?? "",
-        roadArea: user?.address?.roadArea ?? "",
+        phoneNumber: user.phoneNumber ?? "",
+        country: user?.country ?? "",
+        city: user?.city ?? "",
+        address: user?.address ?? "",
       });
     }
   }, [data, form]);
 
   const { mutate, isPending } = useMutation({
-    
     mutationKey: ["update-profile"],
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-        const payload = {
-    name: values.name,
-    phone: values.phone,
-    address: {
-      country: values.country,
-      cityState: values.cityState,
-      roadArea: values.roadArea,
-    },
-  };
+      const payload = {
+        fullName: values.fullName,
+        phoneNumber: values.phoneNumber,
+        country: values.country,
+        city: values.city,
+        address: values.address,
+      };
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/me`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-           body: JSON.stringify(payload),
+          body: JSON.stringify(payload),
         },
       );
       return res.json();
     },
     onSuccess: async (data) => {
-      if (!data?.status) {
+      if (!data?.success) {
         toast.error(data?.message || "Something went wrong");
         return;
       }
@@ -159,7 +156,7 @@ const PersonalInformationForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField
                 control={form.control}
-                name="name"
+                name="fullName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base text-[#1E1E1E] leading-[120%] font-medium">
@@ -198,7 +195,7 @@ const PersonalInformationForm = () => {
               />
               <FormField
                 control={form.control}
-                name="phone"
+                name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base text-[#1E1E1E] leading-[120%] font-medium">
@@ -236,7 +233,7 @@ const PersonalInformationForm = () => {
               />
               <FormField
                 control={form.control}
-                name="cityState"
+                name="city"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base text-[#1E1E1E] leading-[120%] font-medium">
@@ -255,7 +252,7 @@ const PersonalInformationForm = () => {
               />
               <FormField
                 control={form.control}
-                name="roadArea"
+                name="address"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base text-[#1E1E1E] leading-[120%] font-medium">

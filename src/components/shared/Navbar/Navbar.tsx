@@ -21,7 +21,7 @@ import {
 import LogoutModal from "@/components/modals/LogoutModal"
 import { toast } from "sonner"
 import { useQuery } from "@tanstack/react-query"
-import { UserProfileApiResponse } from "@/app/(website)/personal-information/_components/personal-info-data-type"
+import { UserApiResponse } from "@/app/(website)/personal-information/_components/personal-info-data-type"
 // import { useRouter } from "next/navigation"
 
 const Navbar = () => {
@@ -40,10 +40,10 @@ const Navbar = () => {
  
 
   // get api
-  const { data } = useQuery<UserProfileApiResponse>({
-    queryKey: ["profile-img"],
+  const { data } = useQuery<UserApiResponse>({
+    queryKey: ["update-profile"],
     queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/me`, {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ const Navbar = () => {
                 <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
                   <DropdownMenuTrigger>
                     <Image
-                      src={data?.data?.profileImage || "/assets/images/no-user.jpg"}
+                      src={data?.data?.profilePicture || "/assets/images/no-user.jpg"}
                       alt="user-img"
                       width={200}
                       height={200}

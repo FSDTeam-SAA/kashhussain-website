@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import type { VehicleCheckData } from "./vehicle-check.types";
+import Link from "next/link";
 
 type Props = {
   vehicle: VehicleCheckData;
@@ -239,7 +240,7 @@ export default function VehicleCheckExtraInformation({ vehicle }: Props) {
 
   return (
     <section className="relative z-20 bg-[#F6F7F9] py-10 md:py-14">
-      <div className="mx-auto max-w-[1100px] px-3 sm:px-5 lg:px-6">
+      <div className="container">
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.62fr)_minmax(250px,0.82fr)] lg:gap-3">
           <div className="space-y-3">
             <Panel title="Vehicle Details" icon={<CarFront className="h-3.5 w-3.5" />}>
@@ -348,7 +349,13 @@ export default function VehicleCheckExtraInformation({ vehicle }: Props) {
                 <StatBox label="Passed" value={motHistory?.passed ?? 0} tone="success" />
                 <StatBox label="Failed" value={motHistory?.failed ?? 0} tone="default" />
               </div>
+             <Link
+               href={`/mot-history?registrationNumber=${encodeURIComponent(
+                 vehicle.registrationNumber,
+               )}`}
+             >
               <LinkAction label="View MOT History" />
+             </Link>
             </Panel>
 
             <Panel title="Service/Identity Check" icon={<Star className="h-3.5 w-3.5" />}>

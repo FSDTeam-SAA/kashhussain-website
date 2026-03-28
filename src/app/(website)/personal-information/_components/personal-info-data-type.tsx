@@ -1,39 +1,32 @@
-export interface UserProfileApiResponse {
-  status: boolean;
-  message: string;
-  data: UserProfile;
-}
 
-export interface UserProfile {
+
+
+export interface User {
   _id: string;
-  name: string;
+  fullName: string;
   email: string;
-  phone: string;
-  dob: string | null;
-  gender: string;
-  role: "ADMIN" | "USER" | string;
-  stripeAccountId: string | null;
-  bio: string;
-  profileImage: string;
-  multiProfileImage: string[];
-  pdfFile: string;
-  otp: string | null;
-  otpExpires: string | null;
-  otpVerified: boolean;
-  resetExpires: string | null;
-  isVerified: boolean;
-  refreshToken: string;
-  hasActiveSubscription: boolean;
-  subscriptionExpireDate: string | null;
-  blockedUsers: string[];
-  language: string;
-  address: Address;
+  role: "user" | "admin" | string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+
+  address?: string;
+  city?: string;
+  country?: string;
+  gender?: "male" | "female" | "other" | string;
+
+  otp?: string;
+  otpExpiry?: string;
+
+  phoneNumber?: string;
+  profilePicture?: string;
+
+  verifiedForget?: boolean;
 }
 
-export interface Address {
-  country: string;
-  cityState: string;
-  roadArea: string;
-  postalCode: string;
-  taxId: string;
+export interface UserApiResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: User;
 }

@@ -144,10 +144,15 @@ export default function VehicleCheckDetails({
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl text-center text-white">
               <div className="flex justify-center">
-                <RegistrationPlate value={normalizedReg} className="mx-auto h-[76px] max-w-[360px] sm:h-[90px] sm:max-w-[460px]" />
+                <RegistrationPlate
+                  value={normalizedReg}
+                  className="mx-auto h-[76px] max-w-[360px] sm:h-[90px] sm:max-w-[460px]"
+                />
               </div>
 
-              <h2 className="mt-8 text-3xl font-bold sm:text-5xl">{vehicleName}</h2>
+              <h2 className="mt-8 text-3xl font-bold sm:text-5xl">
+                {vehicleName}
+              </h2>
 
               <p className="mt-3 text-sm text-white/90 sm:text-base">
                 Not The Right Vehicle?{" "}
@@ -169,14 +174,22 @@ export default function VehicleCheckDetails({
                       <h3 className="text-lg font-semibold text-[#111827]">
                         We couldn&apos;t load this vehicle check
                       </h3>
-                      <p className="mt-2 text-sm leading-6 text-[#4B5563]">{errorMessage}</p>
+                      <p className="mt-2 text-sm leading-6 text-[#4B5563]">
+                        {errorMessage}
+                      </p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <StatusCard title="Tax" expiryDate={heroSection?.tax?.expiryDate} />
-                  <StatusCard title="MOT" expiryDate={heroSection?.mot?.expiryDate} />
+                  <StatusCard
+                    title="Tax"
+                    expiryDate={heroSection?.tax?.expiryDate}
+                  />
+                  <StatusCard
+                    title="MOT"
+                    expiryDate={heroSection?.mot?.expiryDate}
+                  />
                 </div>
               )}
 
@@ -185,7 +198,9 @@ export default function VehicleCheckDetails({
                   <p className="text-xs uppercase tracking-[0.18em] text-white/65">
                     Registration
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-white">{normalizedReg}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {normalizedReg}
+                  </p>
                 </div>
 
                 <div className="rounded-[24px] bg-white/10 p-4">

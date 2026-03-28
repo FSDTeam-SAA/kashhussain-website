@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { UserProfileApiResponse } from "./personal-info-data-type";
+import { UserApiResponse } from "./personal-info-data-type";
 
 const ProfilePicture = () => {
   const session = useSession();
@@ -22,10 +22,10 @@ const ProfilePicture = () => {
   console.log(setProfileImage);
 
   // get api
-  const { data } = useQuery<UserProfileApiResponse>({
+  const { data } = useQuery<UserApiResponse>({
     queryKey: ["profile-img"],
     queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/me`, {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -39,7 +39,7 @@ const ProfilePicture = () => {
     mutationKey: ["update-profile-image"],
     mutationFn: async (formData: FormData) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/upload-avatar`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/profile`,
         {
           method: "PUT",
           headers: {
@@ -54,7 +54,7 @@ const ProfilePicture = () => {
     onSuccess: (data) => {
       toast.success(data?.message || "Profile image updated successfully!");
       queryClient.invalidateQueries({
-        queryKey: ["profile-img"],
+        queryKey: ["update-profile"],
       });
       console.log("Response:", data);
     },
@@ -65,11 +65,11 @@ const ProfilePicture = () => {
   });
 
   useEffect(() => {
-    const image = data?.data?.profileImage
+    const image = data?.data?.profilePicture
     if (image) {
       setProfileImage(image);
     }
-  }, [data?.data?.profileImage]);
+  }, [data?.data?.profilePicture]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -84,7 +84,7 @@ const ProfilePicture = () => {
 
     // Upload file to backend
     const formData = new FormData();
-    formData.append("profileImage", file, file.name);
+    formData.append("profilePicture", file, file.name);
     mutate(formData);
   };
 
@@ -130,7 +130,7 @@ const ProfilePicture = () => {
         </div>
 
         <div>
-          <h4 className="text-xl md:text-2xl font-semibold text-[#191919] leading-normal pb-1">{data?.data?.name || "N/A"}</h4>
+          <h4 className="text-xl md:text-2xl font-semibold text-[#191919] leading-normal pb-1">{data?.data?.fullName || "N/A"}</h4>
           <p className="text-base text-[#191919] font-normal leading-normal">{data?.data?.email || "N/A"}</p>
         </div>
       </div>

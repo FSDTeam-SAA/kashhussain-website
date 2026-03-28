@@ -1,10 +1,11 @@
-import { Search, FileText, Lock } from "lucide-react";
+import Image from "next/image";
+
 
 type StepItem = {
   id: number;
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: string;
 };
 
 const steps: StepItem[] = [
@@ -13,28 +14,28 @@ const steps: StepItem[] = [
     title: "Enter Vehicle Registration",
     description:
       "Simply type in the UK registration number of the vehicle you want to check.",
-    icon: Search,
+    icon: "/assets/images/hiw1.png",
   },
   {
     id: 2,
     title: "View Free Vehicle Information",
     description:
       "Instantly see basic vehicle details from DVLA records at no cost.",
-    icon: FileText,
+    icon: "/assets/images/hiw2.png",
   },
   {
     id: 3,
     title: "Unlock Full History Report",
     description:
       "Choose a plan and get complete vehicle history including theft, finance, and accident checks.",
-    icon: Lock,
+    icon: "/assets/images/hiw3.png",
   },
 ];
 
 export default function HowItWorksSection() {
   return (
-    <section className="w-full bg-white py-14 md:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="w-full bg-white py-14 md:py-16 lg:py-20">
+      <div className="container">
         
         {/* Header */}
         <div className="mb-12 text-center">
@@ -49,27 +50,32 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Steps */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
           {steps.map((step) => {
-            const Icon = step.icon;
 
             return (
               <div
                 key={step.id}
-                className="flex flex-col items-center rounded-xl border border-gray-200 bg-white px-6 py-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                className="flex flex-col items-center rounded-xl border border-[#E6E7E6] bg-white p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
               >
                 {/* Icon */}
-                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-50">
-                  <Icon className="h-7 w-7 text-blue-600" strokeWidth={2.2} />
+                <div className="mb-4">
+                  <Image
+                    src={step.icon}
+                    alt={step.title}
+                    width={280}
+                    height={280}
+                    className="h-20 w-20 object-contain"
+                  />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-semibold text-[#111827]">
+                <h3 className="text-lg md:text-xl leading-normal font-semibold text-[#111827]">
                   {step.title}
                 </h3>
 
                 {/* Description */}
-                <p className="mt-3 text-sm leading-6 text-gray-500">
+                <p className="mt-2 text-sm md:text-base leading-normal text-[#6B7280]">
                   {step.description}
                 </p>
               </div>
