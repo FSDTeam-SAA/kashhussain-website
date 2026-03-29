@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import VehicleCheckDetails from "./_components/VehicleCheckDetails";
 import type { VehicleCheckResponse } from "./_components/vehicle-check.types";
 import PricingSection from "./_components/pricing-plans";
+import { ChatBot } from "@/components/chatbot/chat-bot";
 
 type PageProps = {
   params: {
@@ -68,6 +69,7 @@ export default async function VehicleCheckPage({ params }: PageProps) {
         errorMessage={errorMessage}
       />
       <PricingSection/>
+      <ChatBot data={data} />
     </div>
   );
 }

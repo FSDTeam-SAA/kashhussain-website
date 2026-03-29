@@ -6,7 +6,7 @@ import AppProvider from "@/components/providers/AppProvider";
 import NextTopLoader from "nextjs-toploader";
 
 import { Sora, Poppins, Inter } from "next/font/google";
-import { ChatBot } from "@/components/chatbot/chat-bot";
+// import { ChatBot } from "@/components/chatbot/chat-bot";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -48,7 +48,7 @@ export default function RootLayout({
             {children}
 
             <Toaster />
-            <ChatBot />
+            {/* <ChatBot /> */}
           </AppProvider>
         </AuthProvider>
       </body>
