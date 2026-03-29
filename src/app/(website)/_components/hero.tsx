@@ -3,9 +3,11 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function HeroSection() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [regNumber, setRegNumber] = useState("");
 
   const formattedReg = useMemo(() => {
@@ -56,12 +58,20 @@ export default function HeroSection() {
                   <input
                     type="text"
                     value={regNumber}
-                    onChange={(e) => setRegNumber(e.target.value)}
+                    readOnly={!session}
+                    onClick={() => {
+                      if (!session) {
+                        router.push("/login?callbackUrl=/");
+                      }
+                    }}
+                    onChange={(e) => {
+                      if (session) setRegNumber(e.target.value);
+                    }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSearch();
+                      if (e.key === "Enter" && session) handleSearch();
                     }}
                     placeholder="ENTER REG"
-                    className="h-full w-full bg-[#FBBF24] px-2 text-left text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wide leading-normal text-black outline-none placeholder:text-black"
+                    className={`h-full w-full bg-[#FBBF24] px-2 text-left text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wide leading-normal text-black outline-none placeholder:text-black ${!session ? "cursor-text" : ""}`}
                   />
                 </div>
               </div>

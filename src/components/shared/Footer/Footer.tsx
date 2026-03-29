@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone } from "lucide-react";
+import { FaFacebookSquare, FaInstagramSquare, FaLinkedin, FaTwitter  } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -80,18 +81,7 @@ const Footer = () => {
               </Link>
             </div> */}
 
-            {/* Phone */}
-            <div className="flex items-center gap-4 mb-3">
-              <Phone className="w-6 h-6 text-white" />
-              <Link
-                href="tel:+1 (555) 123-4567FGHJ"
-                className="text-sm md:text-base leading-normal font-normal text-white"
-              >
-                +1 (555) 123-4567FGHJ
-              </Link>
-            </div>
-
-            {/* Email */}
+             {/* Email */}
             <div className="flex items-center gap-4">
               <Mail className="w-6 h-6 text-white" />
               <Link
@@ -100,6 +90,35 @@ const Footer = () => {
               >
                 help@vehicle.check.com
               </Link>
+            </div>
+
+            {/* Phone */}
+            <div className="flex items-center gap-4 my-3">
+              <Phone className="w-6 h-6 text-white" />
+              <Link
+                href="tel:+1 (555) 123-4567"
+                className="text-sm md:text-base leading-normal font-normal text-white"
+              >
+                +1 (555) 123-4567
+              </Link>
+            </div>
+
+           
+
+            {/* social icons */}
+            <div className="pt-4 flex items-center gap-3">
+              <button>
+                <FaFacebookSquare className="w-10 h-10 text-white"/>
+              </button>
+              <button>
+                <FaInstagramSquare className="w-10 h-10 text-white"/>
+              </button>
+              <button>
+                <FaLinkedin className="w-10 h-10 text-white"/>
+              </button>
+              <button>
+                <FaTwitter className="w-10 h-10 text-white"/>
+              </button>
             </div>
           </div>
         </div>

@@ -3,9 +3,10 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/components/providers/AuthProvider";
 import AppProvider from "@/components/providers/AppProvider";
-import NextTopLoader from 'nextjs-toploader'
+import NextTopLoader from "nextjs-toploader";
 
 import { Sora, Poppins, Inter } from "next/font/google";
+// import { ChatBot } from "@/components/chatbot/chat-bot";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -36,15 +37,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${sora.variable} ${poppins.variable} ${inter.variable}`} >
+    <html
+      lang="en"
+      className={`${sora.variable} ${poppins.variable} ${inter.variable}`}
+    >
       <body>
-        <NextTopLoader color="#1E3A8A" height={3} showSpinner={false}  />
+        <NextTopLoader color="#1E3A8A" height={3} showSpinner={false} />
         <AuthProvider>
           <AppProvider>
-
             {children}
 
             <Toaster />
+            {/* <ChatBot /> */}
           </AppProvider>
         </AuthProvider>
       </body>
