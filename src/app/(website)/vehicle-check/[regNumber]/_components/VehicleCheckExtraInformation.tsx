@@ -371,6 +371,10 @@ export default function VehicleCheckExtraInformation({ vehicle }: Props) {
                 </div>
               </div>
               <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" });
+                }}
                 type="button"
                 className="mt-3 text-[10px] font-semibold text-[#4E67CF] transition-colors hover:text-[#3346A8] sm:text-[11px]"
               >
