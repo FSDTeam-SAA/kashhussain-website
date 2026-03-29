@@ -1,59 +1,95 @@
+
+"use client"
+
+import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { SubscribeApiResponse } from "./pricing-plan-data-type";
 
-export type PricingPlan = {
-  id: string;
-  name: string;
-  price: number;
-  currencySymbol: string;
-  features: string[];
-  buttonText: string;
-  isPopular?: boolean;
-};
+// export type PricingPlan = {
+//   id: string;
+//   name: string;
+//   price: number;
+//   currencySymbol: string;
+//   features: string[];
+//   buttonText: string;
+//   isPopular?: boolean;
+// };
 
-export const pricingPlans: PricingPlan[] = [
-  {
-    id: "basic",
-    name: "Basic Check",
-    price: 4.99,
-    currencySymbol: "£",
-    features: [
-      "DVLA Vehicle Data",
-      "MOT Status & History",
-      "Tax Status",
-      "Vehicle Specifications",
-    ],
-    buttonText: "Buy Now",
-  },
-  {
-    id: "gold",
-    name: "Gold Check",
-    price: 9.99,
-    currencySymbol: "£",
-    features: [
-      "Everything in Basic",
-      "Finance Check",
-      "Mileage Verification",
-      "Ownership Records",
-    ],
-    buttonText: "Buy Now",
-    isPopular: true,
-  },
-  {
-    id: "platinum",
-    name: "Platinum Check",
-    price: 14.99,
-    currencySymbol: "£",
-    features: [
-      "Everything in Gold",
-      "Theft Check",
-      "Accident History",
-      "AI Risk Analysis",
-    ],
-    buttonText: "Buy Now",
-  },
-];
+// export const pricingPlans: PricingPlan[] = [
+//   {
+//     id: "basic",
+//     name: "Basic Check",
+//     price: 4.99,
+//     currencySymbol: "£",
+//     features: [
+//       "DVLA Vehicle Data",
+//       "MOT Status & History",
+//       "Tax Status",
+//       "Vehicle Specifications",
+//     ],
+//     buttonText: "Buy Now",
+//   },
+//   {
+//     id: "gold",
+//     name: "Gold Check",
+//     price: 9.99,
+//     currencySymbol: "£",
+//     features: [
+//       "Everything in Basic",
+//       "Finance Check",
+//       "Mileage Verification",
+//       "Ownership Records",
+//     ],
+//     buttonText: "Buy Now",
+//     isPopular: true,
+//   },
+//   {
+//     id: "platinum",
+//     name: "Platinum Check",
+//     price: 14.99,
+//     currencySymbol: "£",
+//     features: [
+//       "Everything in Gold",
+//       "Theft Check",
+//       "Accident History",
+//       "AI Risk Analysis",
+//     ],
+//     buttonText: "Buy Now",
+//   },
+// ];
 
 export default function PricingSection() {
+
+  const { data: session } = useSession();
+  const token = (session?.user as { accessToken?: string })?.accessToken;
+
+  const { data, isLoading, isError } = useQuery<SubscribeApiResponse>({
+    queryKey: ["manage-plans"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/subscribe`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch contacts");
+      }
+
+      return res.json();
+    },
+    enabled: !!token,
+  });
+
+  const allPlans = data?.data?.data ?? [];
+
+  console.log("Fetched Plans:", allPlans);
+  console.log("Loading State:", isLoading);
+  console.log("Error State:", isError);
   return (
     <section className="bg-[#F5F7FB] py-[60px] md:py-[80px]">
       <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
@@ -69,12 +105,12 @@ export default function PricingSection() {
 
         {/* Cards */}
         <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 xl:gap-[18px]">
-          {pricingPlans.map((plan) => {
-            const isPopular = !!plan.isPopular;
+          {allPlans?.map((plan) => {
+            const isPopular = plan.planName.toLowerCase().includes("Steel Campbell333");
 
             return (
               <div
-                key={plan.id}
+                key={plan._id}
                 className={[
                   "relative flex min-h-[355px] flex-col rounded-[6px] bg-white px-5 pb-5 pt-7",
                   isPopular
@@ -93,12 +129,12 @@ export default function PricingSection() {
 
                 {/* Title */}
                 <p className="text-[18px] font-normal leading-none text-[#8A90A0]">
-                  {plan.name}
+                  {plan?.planName || "N/A"}
                 </p>
 
                 {/* Price */}
                 <h3 className="mt-2 text-[28px] font-bold leading-none tracking-[-0.02em] text-[#2647A5] sm:text-[42px]">
-                  {plan.currencySymbol}
+                  $
                   {plan.price.toFixed(2)}
                 </h3>
 
@@ -126,7 +162,7 @@ export default function PricingSection() {
                         : "bg-[#EEF1F7] text-[#2647A5] hover:bg-[#E8EDF8]",
                     ].join(" ")}
                   >
-                    {plan.buttonText}
+                    Buy Now
                   </button>
                 </div>
               </div>
