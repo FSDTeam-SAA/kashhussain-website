@@ -92,7 +92,7 @@ export default async function VehicleCheckPage({ params }: PageProps) {
         errorMessage={errorMessage}
       />
       <PricingSection/>
-      <ChatBot data={vehicle} />
+      <ChatBot data={vehicle} motHistory={motHistory} />
     </div>
   );
 }
