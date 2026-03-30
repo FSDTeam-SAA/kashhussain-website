@@ -257,7 +257,7 @@ export default function MotHistoryDownloadButton({
       type="button"
       onClick={handleDownload}
       disabled={isDownloading}
-      className="inline-flex min-h-[56px] items-center justify-center gap-2 rounded-[18px] border border-[#8FB3FF]/40 bg-[#3159C8] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(49,89,200,0.35)] transition hover:bg-[#2747a3] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex min-h-[56px] items-center justify-center gap-2 rounded-[18px] border border-[#8FB3FF]/40 bg-primary px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(49,89,200,0.35)] transition hover:bg-[#2747a3] disabled:cursor-not-allowed disabled:opacity-70"
     >
       {isDownloading ? (
         <Loader2 className="h-4 w-4 animate-spin" />

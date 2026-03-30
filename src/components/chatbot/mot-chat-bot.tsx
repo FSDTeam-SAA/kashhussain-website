@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { MessageSquareText, Send, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { VehicleCheckData } from "@/app/(website)/vehicle-check/[regNumber]/_components/vehicle-check.types"
+import { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types"
 import Image from "next/image"
 
 import aiImage from "../../../public/assets/images/ai_prompt.png"
@@ -16,7 +16,7 @@ interface Message {
   text: string
 }
 
-export function ChatBot({ data }: { data?: VehicleCheckData | null }) {
+export function MotChatBot({ data }: { data?: MotHistoryData | null }) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
@@ -97,13 +97,13 @@ export function ChatBot({ data }: { data?: VehicleCheckData | null }) {
     const lastTwoPairs = prevChatPairs.slice(-2)
 
     const payload = {
-      motor_info: data || {},
+      mot_info: data || {},
       user_query: userMessage,
       previous_chat: lastTwoPairs,
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CHATBOT_URL}/ai/analysis/motor`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CHATBOT_URL}/ai/analysis/mot`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,7 +148,7 @@ export function ChatBot({ data }: { data?: VehicleCheckData | null }) {
             {/* Header */}
             <CardHeader className="bg-gradient-to-r from-blue-700 to-blue-600 text-white p-4 flex flex-row justify-between items-center flex-shrink-0 shadow-sm border-b-0 space-y-0">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center">
                   {/* <MessageSquareText className="h-4 w-4 text-white" /> */}
                   <Image src={aiImage} alt="ai" width={300} height={300} className="w-10 h-10 rounded-full"/>
                 </div>

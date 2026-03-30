@@ -10,6 +10,7 @@ import MotHistoryStats from "./mot-history-stats";
 import MotHistoryTimeline from "./mot-history-timeline";
 import type { MotHistoryPayload } from "./mot-history.types";
 import { formatRegistrationNumber } from "./mot-history.utils";
+import { MotChatBot } from "@/components/chatbot/mot-chat-bot";
 
 type Props = {
   initialRegistrationNumber?: string;
@@ -118,6 +119,8 @@ export default function MotHistoryContainer({
     );
   }
 
+  console.log("MOT History Data:", data?.motHistory);
+
   return (
     <div className="bg-[#F7F9FC]">
       <MotHistoryHero
@@ -154,6 +157,8 @@ export default function MotHistoryContainer({
           )}
         </div>
       </section>
+
+      <MotChatBot data={data?.motHistory} />
     </div>
   );
 }
