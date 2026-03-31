@@ -1,14 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 
 export default function HeroSection() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const regFromQuery = searchParams.get("reg");
   const { data: session } = useSession();
-  const [regNumber, setRegNumber] = useState("");
+  const [regNumber, setRegNumber] = useState(regFromQuery || "");
+
+  useEffect(() => {
+    if (regFromQuery) {
+      setRegNumber(regFromQuery);
+    }
+  }, [regFromQuery]);
 
   const formattedReg = useMemo(() => {
     return regNumber.toUpperCase().replace(/\s+/g, "").trim();

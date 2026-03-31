@@ -25,7 +25,7 @@ export default function CheckTabs({
         onClick={() => onChange("free")}
         className={`${baseClass} ${activeTab === "free" ? activeClass : inactiveClass}`}
       >
-        <ClipboardCheck size={16} />
+        <ClipboardCheck size={24} />
         Free Check
       </button>
 
@@ -34,7 +34,7 @@ export default function CheckTabs({
         onClick={() => onChange("purchased")}
         className={`${baseClass} ${activeTab === "purchased" ? activeClass : inactiveClass}`}
       >
-        <ShieldCheck size={16} />
+        <ShieldCheck size={24} />
         Purchased Checks
       </button>
     </div>

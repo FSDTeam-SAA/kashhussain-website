@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function PurchasedChecksEmpty() {
   return (
@@ -18,12 +19,14 @@ export default function PurchasedChecksEmpty() {
         You Have not purchased any checks yet , once4 you have they will appear here.
       </p>
 
+     <Link href="/">
       <button
         type="button"
         className="mt-5 h-[38px] border border-[#7F96D5] px-5 text-[16px] font-medium text-[#27459B] transition hover:bg-[#eef3ff]"
       >
         Click here to get a Check
       </button>
+     </Link>
     </div>
   );
 }

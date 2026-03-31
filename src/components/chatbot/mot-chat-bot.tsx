@@ -25,7 +25,7 @@ export function MotChatBot({ data }: { data?: MotHistoryData | null }) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // LocalStorage Key based on vehicle registration
-  const storageKey = `chatbot_msgs_${data?.registrationNumber || 'default'}`
+  const storageKey = `chatbot_msgs_mot_${data?.registrationNumber || 'default'}`
 
   // Load initial messages from localStorage
   useEffect(() => {
