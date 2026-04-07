@@ -31,6 +31,47 @@ type DetailRow = {
   tone?: "default" | "warning" | "danger" | "success" | "manual";
 };
 
+type RawVehicleData = {
+  vehicle?: {
+    specification?: {
+      bhp?: string;
+      top_speed?: string;
+      acceleration?: string;
+      revenue_weight?: string;
+      engine_litres?: number;
+    };
+    running_costs?: {
+      mpg?: {
+        urban?: string;
+        extra_urban?: string;
+        combined?: string;
+      };
+    };
+    insurance?: {
+      group?: string;
+    };
+    emissions?: string;
+    tax?: {
+      message?: string;
+      ved_band?: string;
+    };
+    mot?: {
+      message?: string;
+    };
+    exported?: {
+      message?: string;
+    };
+    recalls?: {
+      message?: string;
+    };
+    ulez_compliance?: {
+      status?: string;
+    };
+    body_type?: string;
+  };
+  data_source?: string;
+};
+
 const FALLBACK_VALUE = "N/A";
 
 function formatValue(value?: string | number | null) {
@@ -39,13 +80,6 @@ function formatValue(value?: string | number | null) {
   }
   const normalized = String(value).trim();
   return normalized || FALLBACK_VALUE;
-}
-
-function formatNumber(value?: number | null) {
-  if (value === undefined || value === null || Number.isNaN(value)) {
-    return FALLBACK_VALUE;
-  }
-  return new Intl.NumberFormat("en-GB").format(value);
 }
 
 function getPillClass(tone: DetailRow["tone"]) {
@@ -167,25 +201,22 @@ export default function VehicleCheckExtraInformation({
   motHistory,
 }: Props) {
   const details = vehicle?.vehicleDetails;
-  const mileage = vehicle?.mileageInformation;
-  const motHistorySummary = vehicle?.motHistorySummary;
-  const performance = vehicle?.performance;
-  const info = vehicle?.importantVehicleInformation;
-  const dimensions = vehicle?.dimensionsAndWeight;
-  const fuelEconomy = vehicle?.fuelEconomy;
+  const mileage = vehicle?.mileage;
+  const motHistorySummary = vehicle?.motHistory;
+  const info = vehicle?.vehicleFlags;
   const roadTax = vehicle?.roadTax;
-  const safetyRatings = vehicle?.safetyRatings;
-  const co2 = vehicle?.co2EmissionFigures;
+  const rawResponse = vehicle?.rawResponse as RawVehicleData | undefined;
+  const rawVehicle = rawResponse?.vehicle;
+  const performance = rawVehicle?.specification;
+  const fuelEconomy = rawVehicle?.running_costs?.mpg;
+  const insuranceGroup = rawVehicle?.insurance?.group;
+  const co2Value = roadTax?.co2Emissions || rawVehicle?.emissions;
+  const co2Band = roadTax?.co2EmissionBand || rawVehicle?.tax?.ved_band;
+  const dataSource = rawResponse?.data_source;
+  const exportedStatus = info?.exported || rawVehicle?.exported?.message;
+  const safetyRecallStatus = info?.safetyRecalls || rawVehicle?.recalls?.message;
 
   const derivedMileage = useMemo(() => {
-    const lastMileage = motHistory?.lastMileage;
-    const firstUsedYear = motHistory?.firstUsedDate
-      ? new Date(motHistory.firstUsedDate).getFullYear()
-      : null;
-    const currentYear = new Date().getFullYear();
-    const age = firstUsedYear ? Math.max(1, currentYear - firstUsedYear) : 1;
-    const average = lastMileage ? Math.round(lastMileage / age) : null;
-
     let hasIssues = false;
     if (motHistory?.motTests && motHistory.motTests.length >= 2) {
       const sortedTests = [...motHistory.motTests]
@@ -208,10 +239,13 @@ export default function VehicleCheckExtraInformation({
     }
 
     return {
-      lastMotMileage: lastMileage || mileage?.lastMotMileage,
+      lastMotMileage: mileage?.lastMotMileage || null,
       mileageIssues: hasIssues ? "Yes" : mileage?.mileageIssues || "No",
-      average: average || mileage?.average,
-      status: hasIssues ? "FLAGGED" : mileage?.status || "VERIFIED",
+      averageMileage: mileage?.averageMileage || null,
+      estimatedCurrentMileage: mileage?.estimatedCurrentMileage || null,
+      status: hasIssues
+        ? "FLAGGED"
+        : mileage?.mileageStatus?.toUpperCase() || "VERIFIED",
     };
   }, [motHistory, mileage]);
 
@@ -228,35 +262,28 @@ export default function VehicleCheckExtraInformation({
               <TableRows
                 rows={[
                   { label: "Model Variant", value: details?.modelVariant },
-                  { label: "Description", value: details?.description },
-                  { label: "Primary Colour", value: details?.primaryColour },
+                  { label: "Make", value: details?.make },
+                  { label: "Model", value: details?.model },
+                  { label: "Colour", value: details?.colour },
                   { label: "Fuel Type", value: details?.fuelType },
-                  { label: "Transmission", value: details?.transmission },
-                  { label: "Drive type", value: details?.driveType },
-                  { label: "Engine", value: details?.engine },
+                  { label: "Engine", value: details?.engineCapacity },
                   { label: "Body Style", value: details?.bodyStyle },
                   {
                     label: "Year Manufacture",
-                    value: details?.registrationDate
-                      ? new Date(details.registrationDate).getFullYear()
-                      : "N/A",
+                    value: details?.yearOfManufacture,
                   },
-                  { label: "Euro Status", value: details?.euroStatus },
-                  { label: "ULEZ Compliant", value: "Yes" },
+                  { label: "Type Approval", value: details?.typeApproval },
+                  { label: "ULEZ Compliant", value: details?.ulezCompliant },
                   { label: "Vehicle Age", value: details?.vehicleAge },
                   {
-                    label: "Registration Place",
-                    value: details?.registrationPlace,
-                  },
-                  {
                     label: "Registration Date",
-                    value: details?.registrationDate,
+                    value: details?.dateFirstRegistered,
                   },
                   {
                     label: "Last V5C Issue Date",
-                    value: details?.lastV5CIssuedDate,
+                    value: details?.lastV5cIssueDate,
                   },
-                  { label: "Wheel Plan", value: "2 Axle Rigid Body" },
+                  { label: "Wheel Plan", value: details?.wheelPlan },
                 ]}
               />
             </Panel>
@@ -269,7 +296,7 @@ export default function VehicleCheckExtraInformation({
                 <div className="bg-gray-50/80 p-5">
                   <p className="text-[12px] font-medium text-gray-500">Power</p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(performance?.power)}
+                    {formatValue(performance?.bhp)}
                   </p>
                 </div>
                 <div className="bg-gray-50/80 p-5">
@@ -277,7 +304,7 @@ export default function VehicleCheckExtraInformation({
                     Max Speed
                   </p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(performance?.maxSpeed)}
+                    {formatValue(performance?.top_speed)}
                   </p>
                 </div>
                 <div className="bg-gray-50/80 p-5">
@@ -285,15 +312,15 @@ export default function VehicleCheckExtraInformation({
                     Max Torque
                   </p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(performance?.maxTorque)}
+                    {formatValue(insuranceGroup)}
                   </p>
                 </div>
                 <div className="bg-gray-50/80 p-5">
                   <p className="text-[12px] font-medium text-gray-500">
-                    0 to 60 MPH
+                    Acceleration
                   </p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(performance?.zeroToSixty)}
+                    {formatValue(performance?.acceleration)}
                   </p>
                 </div>
               </div>
@@ -307,14 +334,18 @@ export default function VehicleCheckExtraInformation({
                 rows={[
                   {
                     label: "Exported",
-                    value: info?.exported ? "Yes" : "NO",
-                    tone: info?.exported ? "warning" : "default",
+                    value: exportedStatus,
+                    tone:
+                      String(exportedStatus).toLowerCase().includes("not been")
+                        || String(exportedStatus).toLowerCase() === "no"
+                        ? "default"
+                        : "warning",
                   },
                   {
                     label: "Safety Recalls",
-                    value: info?.safetyRecalls || "Manual",
+                    value: safetyRecallStatus || "Manual",
                     tone:
-                      info?.safetyRecalls && info.safetyRecalls !== "Manual"
+                      safetyRecallStatus && safetyRecallStatus !== "Manual"
                         ? "warning"
                         : "manual",
                   },
@@ -391,14 +422,14 @@ export default function VehicleCheckExtraInformation({
             >
               <TableRows
                 rows={[
-                  { label: "Width", value: dimensions?.width },
-                  { label: "Height", value: dimensions?.height },
-                  { label: "Length", value: dimensions?.length },
-                  { label: "Wheel base", value: dimensions?.wheelBase },
-                  { label: "Kerb weight", value: dimensions?.kerbWeight },
+                  { label: "Engine Litres", value: performance?.engine_litres },
+                  { label: "Revenue Weight", value: performance?.revenue_weight },
+                  { label: "Type Approval", value: details?.typeApproval },
+                  { label: "Wheel Plan", value: details?.wheelPlan },
+                  { label: "Body Type", value: details?.bodyStyle || rawVehicle?.body_type },
                   {
-                    label: "Max. allowed weight",
-                    value: dimensions?.maxAllowedWeight,
+                    label: "Data Source",
+                    value: dataSource,
                   },
                 ]}
               />
@@ -415,9 +446,7 @@ export default function VehicleCheckExtraInformation({
                 rows={[
                   {
                     label: "Last MOT Mileage",
-                    value: derivedMileage.lastMotMileage
-                      ? `${formatNumber(derivedMileage.lastMotMileage as number)}`
-                      : FALLBACK_VALUE,
+                    value: derivedMileage.lastMotMileage,
                   },
                   {
                     label: "Mileage issues",
@@ -429,9 +458,11 @@ export default function VehicleCheckExtraInformation({
                   },
                   {
                     label: "Average",
-                    value: derivedMileage.average
-                      ? `${formatNumber(derivedMileage.average as number)} / year`
-                      : FALLBACK_VALUE,
+                    value: derivedMileage.averageMileage,
+                  },
+                  {
+                    label: "Estimated Current Mileage",
+                    value: derivedMileage.estimatedCurrentMileage,
                   },
                 ]}
               />
@@ -544,7 +575,7 @@ export default function VehicleCheckExtraInformation({
                   {
                     label: "Extra Urban",
                     subLabel: "Driving in towns and on faster A-roads",
-                    value: fuelEconomy?.extraUrban,
+                    value: fuelEconomy?.extra_urban,
                   },
                   {
                     label: "Combined",
@@ -561,7 +592,7 @@ export default function VehicleCheckExtraInformation({
             >
               <div className="mb-6 mt-3 text-center">
                 <p className="text-[24px] font-bold text-gray-900">
-                  {formatValue(co2?.value)} g/km (K)
+                  {formatValue(co2Value)} ({formatValue(co2Band)})
                 </p>
               </div>
 
@@ -631,11 +662,11 @@ export default function VehicleCheckExtraInformation({
             >
               <div className="space-y-5 px-1 py-3">
                 {[
-                  { label: "Child", value: safetyRatings?.child || "80%" },
-                  { label: "Adult", value: safetyRatings?.adult || "95%" },
+                  { label: "Tax Status", value: vehicle?.status?.taxStatus || rawVehicle?.tax?.message },
+                  { label: "MOT Status", value: vehicle?.status?.motStatus || rawVehicle?.mot?.message },
                   {
-                    label: "Pedestrian",
-                    value: safetyRatings?.pedestrian || "72%",
+                    label: "ULEZ",
+                    value: details?.ulezCompliant || rawVehicle?.ulez_compliance?.status,
                   },
                 ].map((rating, idx) => (
                   <div key={idx}>
@@ -653,7 +684,7 @@ export default function VehicleCheckExtraInformation({
                         style={{
                           width: rating.value?.toString().includes("%")
                             ? rating.value.toString()
-                            : "85%",
+                            : "100%",
                         }}
                       />
                     </div>
@@ -682,11 +713,19 @@ export default function VehicleCheckExtraInformation({
                 rows={[
                   {
                     label: "Tax 12 Months Cost",
-                    value: roadTax?.tax12MonthsCost,
+                    value: roadTax?.cost12Months,
                   },
                   {
                     label: "Tax 6 Months Cost",
-                    value: roadTax?.tax6MonthsCost,
+                    value: roadTax?.cost6Months,
+                  },
+                  {
+                    label: "CO2 Emissions",
+                    value: co2Value,
+                  },
+                  {
+                    label: "Emission Band",
+                    value: co2Band,
                   },
                 ]}
               />

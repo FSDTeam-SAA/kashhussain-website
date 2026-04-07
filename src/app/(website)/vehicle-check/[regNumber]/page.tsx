@@ -19,14 +19,14 @@ async function getVehicleCheck(regNumber: string) {
 
   try {
     const [vehicleRes, motRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/check-car/free`, {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`, {
         method: "POST",
         headers: {
           accept: "*/*",
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ registrationNumber: regNumber }),
+        body: JSON.stringify({ vrm: regNumber }),
         cache: "no-store",
       }).catch(() => null),
 
@@ -82,6 +82,8 @@ async function getVehicleCheck(regNumber: string) {
 export default async function VehicleCheckPage({ params }: PageProps) {
   const regNumber = decodeURIComponent(params.regNumber);
   const { vehicle, motHistory, errorMessage } = await getVehicleCheck(regNumber);
+
+  console.log("Mot check data:", motHistory)
 
   return (
     <div >

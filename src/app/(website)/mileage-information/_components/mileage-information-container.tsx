@@ -24,16 +24,16 @@ type Props = {
 
 export default function MileageInformationContainer({ vehicle, motHistory }: Props) {
   const router = useRouter();
-  const regNumber = vehicle?.heroSection?.registrationNumber || motHistory?.registrationNumber || "";
-  const vehicleName = vehicle?.heroSection?.vehicleName || vehicle?.vehicleDetails?.modelVariant || "Unknown Vehicle";
+  const regNumber = vehicle?.registrationNumber || motHistory?.registrationNumber || "";
+  const vehicleName =
+    [vehicle?.vehicleDetails?.make, vehicle?.vehicleDetails?.model, vehicle?.vehicleDetails?.modelVariant]
+      .filter(Boolean)
+      .join(" ") || "Unknown Vehicle";
   const fuelType = vehicle?.vehicleDetails?.fuelType || "N/A";
-  const engineSize = vehicle?.vehicleDetails?.engine || "N/A";
-  const year = vehicle?.vehicleDetails?.registrationDate 
-    ? new Date(vehicle.vehicleDetails.registrationDate).getFullYear() 
-    : "N/A";
+  const engineSize = vehicle?.vehicleDetails?.engineCapacity || "N/A";
+  const year = vehicle?.vehicleDetails?.yearOfManufacture || "N/A";
 
-  const motExpiry = vehicle?.heroSection?.mot?.daysLeft || "";
-  const motValid = !motExpiry.includes("Expired") && motExpiry !== "";
+  const motValid = (vehicle?.status?.motStatus || "").toLowerCase() === "valid";
 
   // Parse actual chronological records
   const mileageRecords = useMemo(() => {

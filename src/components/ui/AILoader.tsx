@@ -8,16 +8,16 @@ const AILoader = () => {
     'Initialising Vehicle Check...',
   )
 
-  const loadingStates = [
-    'Scanning registration details...',
-    'Retrieving MOT history...',
-    'Checking tax & insurance status...',
-    'Searching for outstanding finance...',
-    'Analyzing vehicle specifications...',
-    'Compiling final vehicle report...',
-  ]
-
   useEffect(() => {
+    const loadingStates = [
+      'Scanning registration details...',
+      'Retrieving MOT history...',
+      'Checking tax & insurance status...',
+      'Searching for outstanding finance...',
+      'Analyzing vehicle specifications...',
+      'Compiling final vehicle report...',
+    ]
+
     let currentIndex = 0
     const interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % loadingStates.length

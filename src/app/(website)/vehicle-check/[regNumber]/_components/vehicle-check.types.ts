@@ -16,93 +16,64 @@ export type VehicleCheckData = {
   _id?: string;
   user?: string;
   registrationNumber: string;
+  reportType?: string;
   __v?: number;
-  heroSection?: {
-    registrationNumber?: string;
-    vehicleName?: string;
-    tax?: {
-      expiryDate?: string;
-      daysLeft?: string;
-    };
-    mot?: {
-      expiryDate?: string;
-      daysLeft?: string;
-    };
+  status?: {
+    taxStatus?: string;
+    taxDueDate?: string;
+    taxDaysLeft?: number;
+    motStatus?: string;
+    motExpiryDate?: string;
+    motDaysLeft?: number;
   };
   vehicleDetails?: {
+    make?: string;
+    model?: string;
     modelVariant?: string;
-    description?: string;
-    primaryColour?: string;
+    colour?: string;
     fuelType?: string;
-    transmission?: string;
-    driveType?: string;
-    engine?: string;
+    engineCapacity?: string;
     bodyStyle?: string;
     yearOfManufacture?: number;
-    euroStatus?: string;
+    dateFirstRegistered?: string;
+    lastV5cIssueDate?: string;
     ulezCompliant?: string;
-    vehicleAge?: string;
-    registrationPlace?: string;
-    registrationDate?: string;
-    lastV5CIssuedDate?: string;
+    typeApproval?: string;
     wheelPlan?: string;
+    vehicleAge?: string;
   };
-  importantVehicleInformation?: {
+  vehicleFlags?: {
     exported?: string;
     safetyRecalls?: string;
     damageHistory?: string;
     salvageHistory?: string;
     fullServiceHistory?: string;
-    exTaxiNhsPoliceCheck?: string;
     writtenOff?: string;
-    internetHistory?: string;
     onFinance?: string;
     keeperPlateChangesImportExportVinLogbookCheck?: string;
     stolen?: string;
+    internetHistory?: string;
   };
-  mileageInformation?: {
-    lastMotMileage?: number;
+  mileage?: {
+    lastMotMileage?: string;
     mileageIssues?: string;
-    average?: number;
-    status?: string;
+    averageMileage?: string;
+    mileageStatus?: string;
+    estimatedCurrentMileage?: string;
   };
-  motHistorySummary?: {
+  motHistory?: {
     totalTests?: number;
     passed?: number;
     failed?: number;
-  };
-  performance?: {
-    power?: string;
-    maxSpeed?: string;
-    maxTorque?: string;
-    zeroToSixty?: string;
-  };
-  fuelEconomy?: {
-    urban?: string;
-    extraUrban?: string;
-    combined?: string;
-  };
-  co2EmissionFigures?: {
-    value?: string;
-    rating?: string;
-  };
-  safetyRatings?: {
-    child?: string;
-    adult?: string;
-    pedestrian?: string;
-  };
-  dimensionsAndWeight?: {
-    width?: string;
-    height?: string;
-    length?: string;
-    wheelBase?: string;
-    kerbWeight?: string;
-    maxAllowedWeight?: string;
+    passRate?: string;
   };
   roadTax?: {
-    tax12MonthsCost?: string;
-    tax6MonthsCost?: string;
+    cost12Months?: string;
+    cost6Months?: string;
+    co2Emissions?: string;
+    co2EmissionBand?: string;
   };
+  rawResponse?: Record<string, unknown>;
   pricingPlans?: VehiclePlan[];
   createdAt?: string;
   updatedAt?: string;
