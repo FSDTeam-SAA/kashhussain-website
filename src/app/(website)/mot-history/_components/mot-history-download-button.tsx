@@ -13,7 +13,6 @@ import {
   formatRegistrationNumber,
   formatValue,
 } from "./mot-history.utils";
-import type { VehicleCheckData } from "../../vehicle-check/[regNumber]/_components/vehicle-check.types";
 
 type Props = {
   registrationNumber?: string;
@@ -128,12 +127,11 @@ export default function MotHistoryDownloadButton({
       y = 65;
 
       // --- DATA GRID ---
-      const v = vehicle as unknown as VehicleCheckData;
-      const important = v?.importantVehicleInformation || {};
-      const specs = v?.vehicleDetails || {};
+      const important = vehicle?.importantVehicleInformation || {};
+      const specs = vehicle?.vehicleDetails || {};
 
       const leftFields = [
-        { label: "Make", value: motHistory?.make || v?.heroSection?.vehicleName || "Unknown" },
+        { label: "Make", value: motHistory?.make || vehicle?.heroSection?.vehicleName || "Unknown" },
         { label: "First registered", value: formatDate(motHistory?.firstUsedDate) || specs?.registrationDate || "Unknown" },
         { label: "Category of origin", value: specs?.registrationPlace || "UK" },
         { label: "Police", value: important?.stolen || important?.exTaxiNhsPoliceCheck || "No" },

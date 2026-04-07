@@ -15,6 +15,8 @@ type Props = {
   errorMessage?: string | null;
 };
 
+const FALLBACK_VALUE = "Not available";
+
 const formatDate = (value?: string) => {
   if (!value) {
     return "Not available";
@@ -75,13 +77,22 @@ const formatDaysLeft = (value?: string) => {
 
 function StatusCard({
   title,
+  status,
   expiryDate,
+  daysLeft,
 }: {
   title: string;
+  status?: string;
   expiryDate?: string;
+  daysLeft?: number;
 }) {
-  const daysLeft = getDaysLeft(expiryDate);
-  const isHealthy = daysLeft === null ? false : daysLeft >= 0;
+  const resolvedDaysLeft =
+    typeof daysLeft === "number" ? daysLeft : getDaysLeft(expiryDate);
+  const normalizedStatus = status?.toLowerCase();
+  const isHealthy =
+    normalizedStatus === "taxed" ||
+    normalizedStatus === "valid" ||
+    (normalizedStatus ? false : resolvedDaysLeft === null ? false : resolvedDaysLeft >= 0);
 
   return (
     <div className="rounded-[28px] bg-white p-6 text-left shadow-[0_20px_60px_rgba(15,23,42,0.14)]">
@@ -89,6 +100,15 @@ function StatusCard({
         <div>
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#111827]">
             {title}
+          </p>
+          <p
+            className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+              isHealthy
+                ? "bg-[#DCFCE7] text-[#166534]"
+                : "bg-[#FEE2E2] text-[#991B1B]"
+            }`}
+          >
+            {status || FALLBACK_VALUE}
           </p>
           <p className="mt-3 text-sm text-[#4B5563]">
             Expires: {formatDate(expiryDate)}
@@ -98,7 +118,15 @@ function StatusCard({
               isHealthy ? "text-[#16A34A]" : "text-[#DC2626]"
             }`}
           >
-            {formatDaysLeft(expiryDate)}
+            {typeof resolvedDaysLeft === "number"
+              ? resolvedDaysLeft < 0
+                ? `Expired ${Math.abs(resolvedDaysLeft)} days ago`
+                : resolvedDaysLeft === 0
+                  ? "Expires today"
+                  : resolvedDaysLeft === 1
+                    ? "1 day left"
+                    : `${resolvedDaysLeft} days left`
+              : formatDaysLeft(expiryDate)}
           </p>
         </div>
 
@@ -124,9 +152,17 @@ export default function VehicleCheckDetails({
   motHistory,
   errorMessage,
 }: Props) {
-  const heroSection = vehicle?.heroSection;
-  const vehicleName = heroSection?.vehicleName || "Vehicle details unavailable";
-  const normalizedReg = heroSection?.registrationNumber || regNumber;
+  const vehicleDetails = vehicle?.vehicleDetails;
+  const status = vehicle?.status;
+  const normalizedReg = vehicle?.registrationNumber || regNumber;
+  const vehicleName =
+    [vehicleDetails?.make, vehicleDetails?.model, vehicleDetails?.modelVariant]
+      .filter(Boolean)
+      .join(" ") || "Vehicle details unavailable";
+  const vehicleType =
+    vehicleDetails?.bodyStyle ||
+    vehicleDetails?.modelVariant ||
+    FALLBACK_VALUE;
 
   return (
     <>
@@ -187,11 +223,15 @@ export default function VehicleCheckDetails({
                 <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
                   <StatusCard
                     title="Tax"
-                    expiryDate={heroSection?.tax?.expiryDate}
+                    status={status?.taxStatus}
+                    expiryDate={status?.taxDueDate}
+                    daysLeft={status?.taxDaysLeft}
                   />
                   <StatusCard
                     title="MOT"
-                    expiryDate={heroSection?.mot?.expiryDate}
+                    status={status?.motStatus}
+                    expiryDate={status?.motExpiryDate}
+                    daysLeft={status?.motDaysLeft}
                   />
                 </div>
               )}
@@ -221,7 +261,7 @@ export default function VehicleCheckDetails({
                     Vehicle type
                   </p>
                   <p className="mt-2 text-lg font-semibold text-white">
-                    {vehicle?.vehicleDetails?.modelVariant || "Not available"}
+                    {vehicleType}
                   </p>
                 </div>
               </div>

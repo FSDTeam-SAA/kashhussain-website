@@ -37,9 +37,19 @@ export type MotHistoryVehicle = {
     registrationDate?: string | null;
     lastV5CIssuedDate?: string | null;
     wheelPlan?: string | null;
+    registrationPlace?: string | null;
   } | null;
   importantVehicleInformation?: {
     exported?: string | null;
+    stolen?: string | null;
+    exTaxiNhsPoliceCheck?: string | null;
+    onFinance?: string | null;
+    keeperPlateChangesImportExportVinLogbookCheck?: string | null;
+    internetHistory?: string | null;
+    salvageHistory?: string | null;
+    damageHistory?: string | null;
+    writtenOff?: string | null;
+    fullServiceHistory?: string | null;
   } | null;
   co2EmissionFigures?: {
     value?: string | null;
