@@ -23,17 +23,33 @@ type Props = {
 };
 
 export default function MileageInformationContainer({ vehicle, motHistory }: Props) {
+
+
   const router = useRouter();
   const regNumber = vehicle?.registrationNumber || motHistory?.registrationNumber || "";
+  
   const vehicleName =
     [vehicle?.vehicleDetails?.make, vehicle?.vehicleDetails?.model, vehicle?.vehicleDetails?.modelVariant]
       .filter(Boolean)
-      .join(" ") || "Unknown Vehicle";
-  const fuelType = vehicle?.vehicleDetails?.fuelType || "N/A";
-  const engineSize = vehicle?.vehicleDetails?.engineCapacity || "N/A";
+      .join(" ") || motHistory?.make ? `${motHistory?.make} ${motHistory?.model || ""}` : "Unknown Vehicle";
+
+  const fuelType = vehicle?.vehicleDetails?.fuelType || motHistory?.fuelType || "N/A";
+  
+  // Format engine capacity to Litres if it's in cc (e.g. 2998 -> 3.0L)
+  const engineSize = useMemo(() => {
+    const raw = vehicle?.vehicleDetails?.engineCapacity || motHistory?.engineSize;
+    if (!raw) return "N/A";
+    const numeric = parseInt(raw.toString().replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(numeric) && numeric > 500) {
+      return (numeric / 1000).toFixed(1) + "L";
+    }
+    return raw;
+  }, [vehicle, motHistory]);
+
   const year = vehicle?.vehicleDetails?.yearOfManufacture || "N/A";
 
-  const motValid = (vehicle?.status?.motStatus || "").toLowerCase() === "valid";
+  const motStatus = (vehicle?.status?.motStatus || motHistory?.latestTestResult || "").toLowerCase();
+  const motValid = motStatus === "valid" || motStatus === "passed" || motStatus === "pass";
 
   // Parse actual chronological records
   const mileageRecords = useMemo(() => {
@@ -41,7 +57,7 @@ export default function MileageInformationContainer({ vehicle, motHistory }: Pro
     
     // Sort descending for timeline viewing
     const records = motHistory.motTests
-      .filter((test) => test.odometerResultType === "READ" && test.odometerValue && test.completedDate)
+      .filter((test) => test.odometerValue && test.completedDate)
       .map((test) => {
         const date = new Date(test.completedDate as string);
         return {
@@ -104,37 +120,39 @@ export default function MileageInformationContainer({ vehicle, motHistory }: Pro
         <div className="rounded-2xl border border-white/50 bg-white/95 p-5 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] backdrop-blur-md flex flex-col sm:flex-row items-center sm:items-stretch gap-6 transition-all">
           
           <div className="relative h-32 w-48 sm:h-[130px] sm:w-[200px] shrink-0 overflow-hidden rounded-[14px] bg-[linear-gradient(to_bottom_right,#F8FAFC,#E2E8F0)] flex flex-col items-center justify-center border border-slate-200/50 shadow-inner">
-
-             <Image src="/assets/images/car.jpg" alt="Car" width={200} height={130} />
+             <Image src="/assets/images/car.jpg" alt="Car" width={200} height={130} className="object-cover w-full h-full" />
           </div>
 
           <div className="flex flex-col justify-center flex-1 w-full text-center sm:text-left">
-            {/* Context Header: Reg Plate */}
-            <div className="mx-auto sm:mx-0 inline-flex w-fit items-center gap-2 rounded bg-[#1e3a8a] px-3 py-1 font-bold tracking-widest text-white shadow-sm mb-3">
-              <div className="flex h-4 w-5 flex-col items-center justify-center rounded-sm bg-white/20 px-1">
-                 <span className="text-[6px] uppercase text-white/90 font-extrabold">🇬🇧</span>
-              </div>
-              <span className="text-sm">{regNumber}</span>
+            {/* Premium Reg Plate Badge */}
+            <div className="mx-auto sm:mx-0 inline-flex items-center gap-2.5 rounded-lg bg-[#1e3a8a] px-3.5 py-1.5 font-bold tracking-widest text-white shadow-[0_4px_12px_rgba(30,58,138,0.2)] mb-4">
+               <div className="flex items-center gap-1.5 border-r border-white/20 pr-2.5">
+                  <span className="text-[14px]">🏁</span>
+               </div>
+               <span className="text-[15px] uppercase">{regNumber}</span>
+               <div className="flex items-center gap-1.5 border-l border-white/20 pl-2.5">
+                  <Gauge className="w-4 h-4 text-white/70" />
+               </div>
             </div>
 
-            <h2 className="text-[22px] sm:text-[26px] font-bold text-slate-800 mb-5 leading-none">{vehicleName}</h2>
+            <h2 className="text-[24px] sm:text-[28px] font-extrabold text-slate-800 mb-5 leading-tight">{vehicleName}</h2>
 
             {/* Badges Flow */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mt-auto pb-1">
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-sm">
-                <Fuel className="h-[14px] w-[14px] text-blue-500 stroke-[2]" />
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-auto pb-1">
+              <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/60 bg-slate-50/50 px-3 py-1.5 text-[12px] font-bold text-slate-600 shadow-sm transition-colors hover:bg-white hover:border-blue-200">
+                <Fuel className="h-[14px] w-[14px] text-blue-500 stroke-[2.5]" />
                 <span className="capitalize">{fuelType.toLowerCase()}</span>
               </div>
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-sm">
-                <Droplets className="h-[14px] w-[14px] text-blue-500 stroke-[2]" />
+              <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/60 bg-slate-50/50 px-3 py-1.5 text-[12px] font-bold text-slate-600 shadow-sm transition-colors hover:bg-white hover:border-blue-200">
+                <Droplets className="h-[14px] w-[14px] text-blue-500 stroke-[2.5]" />
                 <span>{engineSize}</span>
               </div>
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 shadow-sm">
-                <Calendar className="h-[14px] w-[14px] text-blue-500 stroke-[2]" />
+              <div className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/60 bg-slate-50/50 px-3 py-1.5 text-[12px] font-bold text-slate-600 shadow-sm transition-colors hover:bg-white hover:border-blue-200">
+                <Calendar className="h-[14px] w-[14px] text-blue-500 stroke-[2.5]" />
                 <span>{year}</span>
               </div>
-              <div className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-bold shadow-sm border ${motValid ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
-                {motValid ? <CheckCircle2 className="h-[14px] w-[14px] stroke-[2]" /> : <AlertCircle className="h-[14px] w-[14px] stroke-[2]" />}
+              <div className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold shadow-sm border transition-all ${motValid ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                {motValid ? <CheckCircle2 className="h-[14px] w-[14px] stroke-[2.5]" /> : <AlertCircle className="h-[14px] w-[14px] stroke-[2.5]" />}
                 <span>MOT {motValid ? "Valid" : "Expired"}</span>
               </div>
             </div>

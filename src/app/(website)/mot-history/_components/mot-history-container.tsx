@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, Search } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import MotHistoryHero from "./mot-history-hero";
 import MotHistorySkeleton from "./mot-history-skeleton";
 import MotHistoryStats from "./mot-history-stats";
 import MotHistoryTimeline from "./mot-history-timeline";
-import type { MotHistoryPayload } from "./mot-history.types";
+import type { MotHistoryData, MotHistoryPayload } from "./mot-history.types";
 import { formatRegistrationNumber } from "./mot-history.utils";
 import { MotChatBot } from "@/components/chatbot/mot-chat-bot";
 
@@ -16,14 +17,44 @@ type Props = {
   initialRegistrationNumber?: string;
 };
 
+type MotHistoryApiResponse = {
+  statusCode?: number;
+  success?: boolean;
+  message?: string;
+  data?: MotHistoryPayload | MotHistoryData;
+};
+
+function normalizeMotHistoryPayload(
+  payloadData?: MotHistoryPayload | MotHistoryData,
+): MotHistoryPayload | null {
+  if (!payloadData || typeof payloadData !== "object") {
+    return null;
+  }
+
+  if ("motHistory" in payloadData || "vehicle" in payloadData) {
+    return payloadData as MotHistoryPayload;
+  }
+
+  return {
+    motHistory: payloadData as MotHistoryData,
+  };
+}
+
 export default function MotHistoryContainer({
   initialRegistrationNumber,
 }: Props) {
+  const session = useSession();
+  const token = (session?.data?.user as { accessToken?: string })?.accessToken;
+
   const [data, setData] = useState<MotHistoryPayload | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(initialRegistrationNumber));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (session.status === "loading") {
+      return;
+    }
+
     const registrationNumber = formatRegistrationNumber(initialRegistrationNumber);
 
     if (!registrationNumber) {
@@ -40,30 +71,27 @@ export default function MotHistoryContainer({
       setErrorMessage(null);
 
       try {
-        const response = await fetch("/api/mot-history", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/mot-history/registration/${registrationNumber}`,
+          {
+            method: "GET",
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
           },
-          body: JSON.stringify({ registrationNumber }),
-        });
+        );
 
-        const payload = (await response.json()) as
-          | {
-              success?: boolean;
-              message?: string;
-              data?: MotHistoryPayload;
-            }
-          | undefined;
+        const payload = (await response.json()) as MotHistoryApiResponse | undefined;
+        const normalizedData = normalizeMotHistoryPayload(payload?.data);
 
-        if (!response.ok || !payload?.success || !payload?.data) {
+        if (!response.ok || !payload?.success || !normalizedData) {
           throw new Error(
             payload?.message || "Unable to load MOT history right now.",
           );
         }
 
         if (isMounted) {
-          setData(payload.data);
+          setData(normalizedData);
         }
       } catch (error) {
         if (isMounted) {
@@ -86,7 +114,7 @@ export default function MotHistoryContainer({
     return () => {
       isMounted = false;
     };
-  }, [initialRegistrationNumber]);
+  }, [initialRegistrationNumber, session.status, token]);
 
   if (!initialRegistrationNumber) {
     return (
@@ -118,8 +146,6 @@ export default function MotHistoryContainer({
       </section>
     );
   }
-
-  console.log("MOT History Data:", data?.motHistory);
 
   return (
     <div className="bg-[#F7F9FC]">
