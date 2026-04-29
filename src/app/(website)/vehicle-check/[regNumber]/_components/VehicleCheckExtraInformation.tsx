@@ -17,11 +17,9 @@ import {
 } from "lucide-react";
 
 import type { VehicleCheckData } from "./vehicle-check.types";
-import type { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types";
 
 type Props = {
   vehicle: VehicleCheckData;
-  motHistory?: MotHistoryData | null;
 };
 
 type DetailRow = {
@@ -57,6 +55,10 @@ type RawVehicleData = {
     };
     mot?: {
       message?: string;
+      test_result?: Array<{
+        test_date?: string;
+        odometer_reading?: string;
+      }>;
     };
     exported?: {
       message?: string;
@@ -198,7 +200,6 @@ function LinkAction({ label }: { label: string }) {
 
 export default function VehicleCheckExtraInformation({
   vehicle,
-  motHistory,
 }: Props) {
   const details = vehicle?.vehicleDetails;
   const mileage = vehicle?.mileage;
@@ -218,19 +219,28 @@ export default function VehicleCheckExtraInformation({
 
   const derivedMileage = useMemo(() => {
     let hasIssues = false;
-    if (motHistory?.motTests && motHistory.motTests.length >= 2) {
-      const sortedTests = [...motHistory.motTests]
-        .filter((t) => t.completedDate && t.odometerValue)
+    const motTests = rawVehicle?.mot?.test_result;
+    if (motTests && motTests.length >= 2) {
+      const sortedTests = [...motTests]
+        .filter((t) => t.test_date && t.odometer_reading)
         .sort(
           (a, b) =>
-            new Date(a.completedDate!).getTime() -
-            new Date(b.completedDate!).getTime(),
+            new Date(a.test_date!).getTime() -
+            new Date(b.test_date!).getTime(),
         );
 
       for (let i = 1; i < sortedTests.length; i++) {
+        const currentValue = Number(
+          (sortedTests[i].odometer_reading || "").replace(/[^\d.]/g, ""),
+        );
+        const previousValue = Number(
+          (sortedTests[i - 1].odometer_reading || "").replace(/[^\d.]/g, ""),
+        );
+
         if (
-          Number(sortedTests[i].odometerValue) <
-          Number(sortedTests[i - 1].odometerValue)
+          Number.isFinite(currentValue) &&
+          Number.isFinite(previousValue) &&
+          currentValue < previousValue
         ) {
           hasIssues = true;
           break;
@@ -247,7 +257,7 @@ export default function VehicleCheckExtraInformation({
         ? "FLAGGED"
         : mileage?.mileageStatus?.toUpperCase() || "VERIFIED",
     };
-  }, [motHistory, mileage]);
+  }, [mileage, rawVehicle?.mot?.test_result]);
 
   return (
     <section className="relative z-20 bg-gray-50/50 py-10 md:py-16">
@@ -499,9 +509,7 @@ export default function VehicleCheckExtraInformation({
                     Total Tests
                   </p>
                   <p className="mt-2 text-3xl font-bold text-gray-900">
-                    {motHistory?.totalTests ??
-                      motHistorySummary?.totalTests ??
-                      0}
+                    {motHistorySummary?.totalTests ?? 0}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-green-100 bg-green-50/50 p-4 text-center shadow-sm">
@@ -509,7 +517,7 @@ export default function VehicleCheckExtraInformation({
                     Passed
                   </p>
                   <p className="mt-2 text-3xl font-bold text-green-600">
-                    {motHistory?.totalPassed ?? motHistorySummary?.passed ?? 0}
+                    {motHistorySummary?.passed ?? 0}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-gray-100 bg-gray-50/50 p-4 text-center shadow-sm">
@@ -517,7 +525,7 @@ export default function VehicleCheckExtraInformation({
                     Failed
                   </p>
                   <p className="mt-2 text-3xl font-bold text-gray-900">
-                    {motHistory?.totalFailed ?? motHistorySummary?.failed ?? 0}
+                    {motHistorySummary?.failed ?? 0}
                   </p>
                 </div>
               </div>

@@ -1,9 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import MileageInformationContainer from "./_components/mileage-information-container";
-import type { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types";
 import type { VehicleCheckData } from "@/app/(website)/vehicle-check/[regNumber]/_components/vehicle-check.types";
-import VehicleCheckExtraInformation from "@/app/(website)/vehicle-check/[regNumber]/_components/VehicleCheckExtraInformation";
+// import VehicleCheckExtraInformation from "@/app/(website)/vehicle-check/[regNumber]/_components/VehicleCheckExtraInformation";
 
 type PageProps = {
   searchParams: {
@@ -16,8 +15,9 @@ async function getMileageData(regNumber: string) {
   const token = (session?.user as { accessToken?: string })?.accessToken;
 
   try {
-    const [vehicleRes, motRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`, {
+    const vehicleRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`,
+      {
         method: "POST",
         headers: {
           accept: "*/*",
@@ -26,19 +26,8 @@ async function getMileageData(regNumber: string) {
         },
         body: JSON.stringify({ vrm: regNumber }),
         cache: "no-store",
-      }).catch(() => null),
-
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/check-car/mot-history`, {
-        method: "POST",
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ registrationNumber: regNumber }),
-        cache: "no-store",
-      }).catch(() => null),
-    ]);
+      },
+    ).catch(() => null);
 
     let vehicle = null;
     let errorMessage = "";
@@ -52,27 +41,17 @@ async function getMileageData(regNumber: string) {
       }
     }
 
-    let motHistory = null;
-    if (motRes && motRes.ok) {
-      const payload = await motRes.json();
-      if (payload?.success) {
-        motHistory = payload?.data?.motHistory as MotHistoryData;
-      }
-    }
-
     if (!vehicle && !errorMessage) {
       errorMessage = "Vehicle details not found.";
     }
 
     return {
       vehicle,
-      motHistory,
       errorMessage: errorMessage || null,
     };
   } catch (error) {
     return {
       vehicle: null,
-      motHistory: null,
       errorMessage: error instanceof Error ? error.message : "Unable to connect to the mileage service.",
     };
   }
@@ -89,7 +68,7 @@ export default async function MileageInformationPage({ searchParams }: PageProps
     );
   }
 
-  const { vehicle, motHistory, errorMessage } = await getMileageData(regNumber);
+  const { vehicle, errorMessage } = await getMileageData(regNumber);
 
   if (errorMessage) {
     return (
@@ -103,10 +82,10 @@ export default async function MileageInformationPage({ searchParams }: PageProps
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <MileageInformationContainer vehicle={vehicle} motHistory={motHistory} />
-      {vehicle && (
-        <VehicleCheckExtraInformation vehicle={vehicle} motHistory={motHistory} />
-      )}
+      <MileageInformationContainer vehicle={vehicle} />
+      {/* {vehicle && (
+        <VehicleCheckExtraInformation vehicle={vehicle} />
+      )} */}
     </div>
   );
 }
