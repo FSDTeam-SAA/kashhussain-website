@@ -24,19 +24,174 @@ type MotHistoryApiResponse = {
   data?: MotHistoryPayload | MotHistoryData;
 };
 
-function normalizeMotHistoryPayload(
-  payloadData?: MotHistoryPayload | MotHistoryData,
+type CarTaxCheckResponse = {
+  statusCode?: number;
+  success?: boolean;
+  message?: string;
+  data?: {
+    registrationNumber?: string;
+    status?: {
+      taxDueDate?: string;
+      taxDaysLeft?: number;
+      motExpiryDate?: string;
+      motDaysLeft?: number;
+    };
+    vehicleDetails?: {
+      make?: string;
+      model?: string;
+      modelVariant?: string;
+      colour?: string;
+      fuelType?: string;
+      engineCapacity?: string;
+      yearOfManufacture?: number;
+      dateFirstRegistered?: string;
+      lastV5cIssueDate?: string;
+      wheelPlan?: string;
+    };
+    vehicleFlags?: {
+      exported?: string;
+      stolen?: string;
+      onFinance?: string;
+      keeperPlateChangesImportExportVinLogbookCheck?: string;
+      internetHistory?: string;
+      salvageHistory?: string;
+      damageHistory?: string;
+      writtenOff?: string;
+      fullServiceHistory?: string;
+    };
+    rawResponse?: {
+      vehicle?: {
+        registered_location?: string;
+        mot?: {
+          test_result?: Array<{
+            status?: string;
+            test_date?: string;
+            expiry_date?: string;
+            odometer_reading?: string;
+            advisory?: Array<{
+              description?: string;
+              dangerous?: boolean;
+            }>;
+          }>;
+          test_summary?: {
+            test_count?: number;
+            pass_count?: number;
+            pass_with_advisory_count?: number;
+            fail_count?: number;
+          };
+        };
+      };
+    };
+  };
+};
+
+function mapCarTaxPayloadToMotHistory(
+  payloadData?: CarTaxCheckResponse["data"],
 ): MotHistoryPayload | null {
   if (!payloadData || typeof payloadData !== "object") {
     return null;
   }
 
-  if ("motHistory" in payloadData || "vehicle" in payloadData) {
-    return payloadData as MotHistoryPayload;
-  }
+  const motTests = (payloadData.rawResponse?.vehicle?.mot?.test_result ?? [])
+    .map((test) => {
+      const comments =
+        test.advisory?.map((item) => ({
+          text: item.description || null,
+          type: "ADVISORY",
+          dangerous: item.dangerous ?? null,
+        })) ?? [];
+
+      return {
+        completedDate: test.test_date || null,
+        testResult: test.status || null,
+        expiryDate: test.expiry_date || null,
+        odometerValue: test.odometer_reading || null,
+        odometerUnit: "mi",
+        odometerResultType: "PRH",
+        rfrAndComments: comments.length ? comments : null,
+      };
+    })
+    .sort((a, b) => {
+      const aTime = a.completedDate ? new Date(a.completedDate).getTime() : 0;
+      const bTime = b.completedDate ? new Date(b.completedDate).getTime() : 0;
+      return bTime - aTime;
+    });
+
+  const latestTest = motTests[0];
+  const summary = payloadData.rawResponse?.vehicle?.mot?.test_summary;
+  const totalPassed =
+    (summary?.pass_count ?? 0) + (summary?.pass_with_advisory_count ?? 0);
 
   return {
-    motHistory: payloadData as MotHistoryData,
+    vehicle: {
+      registrationNumber: payloadData.registrationNumber || null,
+      heroSection: {
+        registrationNumber: payloadData.registrationNumber || null,
+        vehicleName:
+          [payloadData.vehicleDetails?.make, payloadData.vehicleDetails?.model]
+            .filter(Boolean)
+            .join(" ") || null,
+        tax: {
+          expiryDate: payloadData.status?.taxDueDate || null,
+          daysLeft:
+            payloadData.status?.taxDaysLeft !== undefined
+              ? String(payloadData.status.taxDaysLeft)
+              : null,
+        },
+        mot: {
+          expiryDate: payloadData.status?.motExpiryDate || null,
+          daysLeft:
+            payloadData.status?.motDaysLeft !== undefined
+              ? String(payloadData.status.motDaysLeft)
+              : null,
+        },
+      },
+      vehicleDetails: {
+        modelVariant: payloadData.vehicleDetails?.modelVariant || null,
+        primaryColour: payloadData.vehicleDetails?.colour || null,
+        fuelType: payloadData.vehicleDetails?.fuelType || null,
+        engine: payloadData.vehicleDetails?.engineCapacity || null,
+        yearOfManufacture: payloadData.vehicleDetails?.yearOfManufacture || null,
+        registrationDate: payloadData.vehicleDetails?.dateFirstRegistered || null,
+        lastV5CIssuedDate: payloadData.vehicleDetails?.lastV5cIssueDate || null,
+        wheelPlan: payloadData.vehicleDetails?.wheelPlan || null,
+        registrationPlace:
+          payloadData.rawResponse?.vehicle?.registered_location || null,
+      },
+      importantVehicleInformation: {
+        exported: payloadData.vehicleFlags?.exported || null,
+        stolen: payloadData.vehicleFlags?.stolen || null,
+        onFinance: payloadData.vehicleFlags?.onFinance || null,
+        keeperPlateChangesImportExportVinLogbookCheck:
+          payloadData.vehicleFlags?.keeperPlateChangesImportExportVinLogbookCheck ||
+          null,
+        internetHistory: payloadData.vehicleFlags?.internetHistory || null,
+        salvageHistory: payloadData.vehicleFlags?.salvageHistory || null,
+        damageHistory: payloadData.vehicleFlags?.damageHistory || null,
+        writtenOff: payloadData.vehicleFlags?.writtenOff || null,
+        fullServiceHistory: payloadData.vehicleFlags?.fullServiceHistory || null,
+      },
+    },
+    motHistory: {
+      registrationNumber: payloadData.registrationNumber || null,
+      make: payloadData.vehicleDetails?.make || null,
+      model: payloadData.vehicleDetails?.model || null,
+      primaryColour: payloadData.vehicleDetails?.colour || null,
+      fuelType: payloadData.vehicleDetails?.fuelType || null,
+      firstUsedDate: payloadData.vehicleDetails?.dateFirstRegistered || null,
+      engineSize:
+        payloadData.vehicleDetails?.engineCapacity?.replace(/[^\d]/g, "") || null,
+      motTests,
+      totalTests: summary?.test_count ?? motTests.length,
+      totalPassed,
+      totalFailed: summary?.fail_count ?? 0,
+      latestTestResult: latestTest?.testResult || null,
+      latestExpiryDate:
+        latestTest?.expiryDate || payloadData.status?.motExpiryDate || null,
+      lastMileage: latestTest?.odometerValue
+        ? Number(String(latestTest.odometerValue).replace(/[^\d]/g, ""))
+        : null,
+    },
   };
 }
 
@@ -72,17 +227,26 @@ export default function MotHistoryContainer({
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/mot-history/registration/${registrationNumber}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`,
           {
-            method: "GET",
+            method: "POST",
             headers: {
+              accept: "*/*",
+              "Content-Type": "application/json",
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
+            body: JSON.stringify({ vrm: registrationNumber }),
+            cache: "no-store",
           },
         );
 
-        const payload = (await response.json()) as MotHistoryApiResponse | undefined;
-        const normalizedData = normalizeMotHistoryPayload(payload?.data);
+        const payload = (await response.json()) as
+          | CarTaxCheckResponse
+          | MotHistoryApiResponse
+          | undefined;
+        const normalizedData = mapCarTaxPayloadToMotHistory(
+          (payload as CarTaxCheckResponse | undefined)?.data,
+        );
 
         if (!response.ok || !payload?.success || !normalizedData) {
           throw new Error(

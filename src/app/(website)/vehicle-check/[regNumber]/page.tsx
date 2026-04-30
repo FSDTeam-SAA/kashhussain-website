@@ -18,8 +18,9 @@ async function getVehicleCheck(regNumber: string) {
   const token = (session?.user as { accessToken?: string })?.accessToken;
 
   try {
-    const [vehicleRes, motRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`, {
+    const vehicleRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`,
+      {
         method: "POST",
         headers: {
           accept: "*/*",
@@ -28,19 +29,8 @@ async function getVehicleCheck(regNumber: string) {
         },
         body: JSON.stringify({ vrm: regNumber }),
         cache: "no-store",
-      }).catch(() => null),
-
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/check-car/mot-history`, {
-        method: "POST",
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ registrationNumber: regNumber }),
-        cache: "no-store",
-      }).catch(() => null)
-    ]);
+      },
+    ).catch(() => null);
 
     let vehicle = null;
     let errorMessage = "Vehicle check request failed.";
@@ -54,23 +44,13 @@ async function getVehicleCheck(regNumber: string) {
       }
     }
 
-    let motHistory = null;
-    if (motRes && motRes.ok) {
-      const motPayload = await motRes.json();
-      if (motPayload?.success) {
-        motHistory = motPayload?.data?.motHistory || null;
-      }
-    }
-
     return {
       vehicle,
-      motHistory,
       errorMessage: errorMessage || null,
     };
   } catch (error) {
     return {
       vehicle: null,
-      motHistory: null,
       errorMessage:
         error instanceof Error
           ? error.message
@@ -81,20 +61,18 @@ async function getVehicleCheck(regNumber: string) {
 
 export default async function VehicleCheckPage({ params }: PageProps) {
   const regNumber = decodeURIComponent(params.regNumber);
-  const { vehicle, motHistory, errorMessage } = await getVehicleCheck(regNumber);
-
-  console.log("Mot check data:", motHistory)
+  const { vehicle, errorMessage } = await getVehicleCheck(regNumber);
 
   return (
     <div >
       <VehicleCheckDetails
         regNumber={regNumber}
         vehicle={vehicle}
-        motHistory={motHistory}
         errorMessage={errorMessage}
       />
       <PricingSection/>
-      <ChatBot data={vehicle} motHistory={motHistory} />
+      <ChatBot data={vehicle}  />
+       {/* <ChatBot data={vehicle} motHistory={vehicle?.motHistory ?? null} /> */}
     </div>
   );
 }
