@@ -27,7 +27,7 @@ type Props = {
 
 export function ChatBot({
   data,
-  motHistory,
+  // motHistory,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
@@ -110,8 +110,8 @@ export function ChatBot({
 
     const payload = {
       motor_info: data || {},
-      mot_info: motHistory || {},
-      milleage_info: motHistory || {},
+      // mot_info: motHistory || {},
+      // milleage_info: motHistory || {},
       user_query: userMessage,
       previous_chat: lastTwoPairs,
     }

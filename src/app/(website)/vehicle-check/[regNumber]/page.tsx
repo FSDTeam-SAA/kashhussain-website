@@ -71,7 +71,8 @@ export default async function VehicleCheckPage({ params }: PageProps) {
         errorMessage={errorMessage}
       />
       <PricingSection/>
-      <ChatBot data={vehicle} motHistory={vehicle?.motHistory ?? null} />
+      <ChatBot data={vehicle}  />
+       {/* <ChatBot data={vehicle} motHistory={vehicle?.motHistory ?? null} /> */}
     </div>
   );
 }
