@@ -6,10 +6,12 @@ import { CheckCircle2, Clock3, ShieldAlert } from "lucide-react";
 import RegistrationPlate from "./RegistrationPlate";
 import VehicleCheckExtraInformation from "./VehicleCheckExtraInformation";
 import type { VehicleCheckData } from "./vehicle-check.types";
+import type { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types";
 
 type Props = {
   regNumber: string;
   vehicle?: VehicleCheckData | null;
+  motHistory?: MotHistoryData | null;
   errorMessage?: string | null;
 };
 
@@ -147,6 +149,7 @@ function StatusCard({
 export default function VehicleCheckDetails({
   regNumber,
   vehicle,
+  motHistory,
   errorMessage,
 }: Props) {
   const vehicleDetails = vehicle?.vehicleDetails;
@@ -267,7 +270,7 @@ export default function VehicleCheckDetails({
         </div>
       </section>
 
-      {vehicle ? <VehicleCheckExtraInformation vehicle={vehicle} /> : null}
+      {vehicle ? <VehicleCheckExtraInformation vehicle={vehicle} motHistory={motHistory} /> : null}
     </>
   );
 }
