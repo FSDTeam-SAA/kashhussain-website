@@ -18,8 +18,9 @@ async function getVehicleCheck(regNumber: string) {
   const token = (session?.user as { accessToken?: string })?.accessToken;
 
   try {
-    const [vehicleRes, motRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`, {
+    const vehicleRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`,
+      {
         method: "POST",
         headers: {
           accept: "*/*",
@@ -65,13 +66,11 @@ async function getVehicleCheck(regNumber: string) {
 
     return {
       vehicle,
-      motHistory,
       errorMessage: errorMessage || null,
     };
   } catch (error) {
     return {
       vehicle: null,
-      motHistory: null,
       errorMessage:
         error instanceof Error
           ? error.message
@@ -89,11 +88,11 @@ export default async function VehicleCheckPage({ params }: PageProps) {
       <VehicleCheckDetails
         regNumber={regNumber}
         vehicle={vehicle}
-        motHistory={motHistory}
         errorMessage={errorMessage}
       />
       <PricingSection/>
-      <ChatBot data={vehicle} motHistory={motHistory} />
+      <ChatBot data={vehicle}  />
+       {/* <ChatBot data={vehicle} motHistory={vehicle?.motHistory ?? null} /> */}
     </div>
   );
 }

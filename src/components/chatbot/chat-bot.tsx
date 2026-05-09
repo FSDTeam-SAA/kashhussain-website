@@ -10,7 +10,8 @@ import { VehicleCheckData } from "@/app/(website)/vehicle-check/[regNumber]/_com
 import Image from "next/image"
 
 import aiImage from "../../../public/assets/images/ai_prompt.png"
-import { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types"
+
+type MotSummaryData = VehicleCheckData["motHistory"];
 
 interface Message {
   sender: "user" | "bot"
@@ -18,7 +19,7 @@ interface Message {
 }
 
 type Props = {
-  motHistory?: MotHistoryData | null;
+  motHistory?: MotSummaryData | null;
   data?: VehicleCheckData | null;
 };
 
@@ -26,7 +27,7 @@ type Props = {
 
 export function ChatBot({
   data,
-  motHistory,
+  // motHistory,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
@@ -109,8 +110,8 @@ export function ChatBot({
 
     const payload = {
       motor_info: data || {},
-      mot_info: motHistory || {},
-      milleage_info: motHistory || {},
+      // mot_info: motHistory || {},
+      // milleage_info: motHistory || {},
       user_query: userMessage,
       previous_chat: lastTwoPairs,
     }

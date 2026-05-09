@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import MileageInformationContainer from "./_components/mileage-information-container";
-import type { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types";
 import type { VehicleCheckData } from "@/app/(website)/vehicle-check/[regNumber]/_components/vehicle-check.types";
 
 type PageProps = {
@@ -15,8 +14,9 @@ async function getMileageData(regNumber: string) {
   const token = (session?.user as { accessToken?: string })?.accessToken;
 
   try {
-    const [vehicleRes, motRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`, {
+    const vehicleRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/car-tax/check`,
+      {
         method: "POST",
         headers: {
           accept: "*/*",
@@ -63,13 +63,11 @@ async function getMileageData(regNumber: string) {
 
     return {
       vehicle,
-      motHistory,
       errorMessage: errorMessage || null,
     };
   } catch (error) {
     return {
       vehicle: null,
-      motHistory: null,
       errorMessage: error instanceof Error ? error.message : "Unable to connect to the mileage service.",
     };
   }
@@ -86,7 +84,7 @@ export default async function MileageInformationPage({ searchParams }: PageProps
     );
   }
 
-  const { vehicle, motHistory, errorMessage } = await getMileageData(regNumber);
+  const { vehicle, errorMessage } = await getMileageData(regNumber);
 
   if (errorMessage) {
     return (

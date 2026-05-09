@@ -14,19 +14,28 @@ import {
 } from "recharts";
 
 import type { VehicleCheckData } from "@/app/(website)/vehicle-check/[regNumber]/_components/vehicle-check.types";
-import type { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types";
 import Image from "next/image";
 
 type Props = {
   vehicle?: VehicleCheckData | null;
-  motHistory?: MotHistoryData | null;
 };
 
-export default function MileageInformationContainer({ vehicle, motHistory }: Props) {
+type RawVehicleData = {
+  vehicle?: {
+    mot?: {
+      test_result?: Array<{
+        test_date?: string;
+        odometer_reading?: string;
+      }>;
+    };
+  };
+};
+
+export default function MileageInformationContainer({ vehicle }: Props) {
 
 
   const router = useRouter();
-  const regNumber = vehicle?.registrationNumber || motHistory?.registrationNumber || "";
+  const regNumber = vehicle?.registrationNumber || "";
   
   const vehicleName = useMemo(() => {
     const fromVehicle = [
@@ -47,31 +56,34 @@ export default function MileageInformationContainer({ vehicle, motHistory }: Pro
     return fromMot || "Unknown Vehicle";
   }, [vehicle, motHistory]);
 
-  const fuelType = vehicle?.vehicleDetails?.fuelType || motHistory?.fuelType || "N/A";
+  const fuelType = vehicle?.vehicleDetails?.fuelType || "N/A";
   
   // Format engine capacity to Litres if it's in cc (e.g. 2998 -> 3.0L)
   const engineSize = useMemo(() => {
-    const raw = vehicle?.vehicleDetails?.engineCapacity || motHistory?.engineSize;
+    const raw = vehicle?.vehicleDetails?.engineCapacity;
     if (!raw) return "N/A";
     const numeric = parseInt(raw.toString().replace(/[^0-9]/g, ""), 10);
     if (!isNaN(numeric) && numeric > 500) {
       return (numeric / 1000).toFixed(1) + "L";
     }
     return raw;
-  }, [vehicle, motHistory]);
+  }, [vehicle]);
 
   const year = vehicle?.vehicleDetails?.yearOfManufacture || "N/A";
 
-  const motStatus = (vehicle?.status?.motStatus || motHistory?.latestTestResult || "").toLowerCase();
+  const motStatus = (vehicle?.status?.motStatus || "").toLowerCase();
   const motValid = motStatus === "valid" || motStatus === "passed" || motStatus === "pass";
 
   // Parse actual chronological records
+  const rawResponse = vehicle?.rawResponse as RawVehicleData | undefined;
+  const motTestResult = rawResponse?.vehicle?.mot?.test_result;
+
   const mileageRecords = useMemo(() => {
-    if (!motHistory?.motTests) return [];
+    if (!motTestResult) return [];
     
     // Sort descending for timeline viewing
-    const records = motHistory.motTests
-      .filter((test) => test.odometerValue && test.completedDate)
+    const records = motTestResult
+      .filter((test) => test.odometer_reading && test.test_date)
       .map((test) => {
         const date = new Date(test.completedDate as string);
         const mileage = Number.parseInt(String(test.odometerValue), 10);
@@ -95,7 +107,7 @@ export default function MileageInformationContainer({ vehicle, motHistory }: Pro
     }
     
     return uniqueRecords;
-  }, [motHistory]);
+  }, [motTestResult]);
 
   const chartData = useMemo(() => {
       // Recharts plots nicely from oldest (left) to newest (right). We reverse our descending list.
