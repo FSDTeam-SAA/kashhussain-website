@@ -37,10 +37,24 @@ export default function MileageInformationContainer({ vehicle }: Props) {
   const router = useRouter();
   const regNumber = vehicle?.registrationNumber || "";
   
-  const vehicleName =
-    [vehicle?.vehicleDetails?.make, vehicle?.vehicleDetails?.model, vehicle?.vehicleDetails?.modelVariant]
+  const vehicleName = useMemo(() => {
+    const fromVehicle = [
+      vehicle?.vehicleDetails?.make,
+      vehicle?.vehicleDetails?.model,
+      vehicle?.vehicleDetails?.modelVariant,
+    ]
       .filter(Boolean)
-      .join(" ") || "Unknown Vehicle";
+      .join(" ");
+
+    if (fromVehicle) return fromVehicle;
+
+    const fromMot = [motHistory?.make, motHistory?.model]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
+    return fromMot || "Unknown Vehicle";
+  }, [vehicle, motHistory]);
 
   const fuelType = vehicle?.vehicleDetails?.fuelType || "N/A";
   
@@ -71,18 +85,15 @@ export default function MileageInformationContainer({ vehicle }: Props) {
     const records = motTestResult
       .filter((test) => test.odometer_reading && test.test_date)
       .map((test) => {
-        const date = new Date(test.test_date as string);
-        const mileage = parseInt(
-          String(test.odometer_reading).replace(/[^0-9]/g, ""),
-          10,
-        );
+        const date = new Date(test.completedDate as string);
+        const mileage = Number.parseInt(String(test.odometerValue), 10);
         return {
           year: date.getFullYear().toString(),
           mileage,
           fullDate: date,
         };
       })
-      .filter((record) => !Number.isNaN(record.mileage) && !Number.isNaN(record.fullDate.getTime()))
+      .filter((item) => !Number.isNaN(item.mileage) && !Number.isNaN(item.fullDate.getTime()))
       .sort((a, b) => b.fullDate.getTime() - a.fullDate.getTime());
 
     // De-duplication for timeline (keeping the latest valid record for that specific year)

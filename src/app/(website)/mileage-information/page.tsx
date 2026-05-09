@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import MileageInformationContainer from "./_components/mileage-information-container";
 import type { VehicleCheckData } from "@/app/(website)/vehicle-check/[regNumber]/_components/vehicle-check.types";
-// import VehicleCheckExtraInformation from "@/app/(website)/vehicle-check/[regNumber]/_components/VehicleCheckExtraInformation";
 
 type PageProps = {
   searchParams: {
@@ -26,8 +25,17 @@ async function getMileageData(regNumber: string) {
         },
         body: JSON.stringify({ vrm: regNumber }),
         cache: "no-store",
-      },
-    ).catch(() => null);
+      }).catch(() => null),
+
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mot-history/registration/${encodeURIComponent(regNumber)}`, {
+        method: "GET",
+        headers: {
+          accept: "*/*",
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+      }).catch(() => null),
+    ]);
 
     let vehicle = null;
     let errorMessage = "";
@@ -38,6 +46,14 @@ async function getMileageData(regNumber: string) {
         vehicle = payload.data as VehicleCheckData;
       } else {
         errorMessage = payload?.message || "Failed to fetch vehicle details.";
+      }
+    }
+
+    let motHistory = null;
+    if (motRes && motRes.ok) {
+      const payload = await motRes.json();
+      if (payload?.success) {
+        motHistory = payload?.data as MotHistoryData;
       }
     }
 
@@ -82,10 +98,8 @@ export default async function MileageInformationPage({ searchParams }: PageProps
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <MileageInformationContainer vehicle={vehicle} />
-      {/* {vehicle && (
-        <VehicleCheckExtraInformation vehicle={vehicle} />
-      )} */}
+      <MileageInformationContainer vehicle={vehicle} motHistory={motHistory} />
+   
     </div>
   );
 }

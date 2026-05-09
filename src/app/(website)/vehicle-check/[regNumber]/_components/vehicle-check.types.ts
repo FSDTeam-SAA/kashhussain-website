@@ -17,6 +17,7 @@ export type VehicleCheckData = {
   user?: string;
   registrationNumber: string;
   reportType?: string;
+  keyType?: string;
   __v?: number;
   status?: {
     taxStatus?: string;
@@ -44,6 +45,7 @@ export type VehicleCheckData = {
   };
   vehicleFlags?: {
     exported?: string;
+    imported?: string;
     safetyRecalls?: string;
     damageHistory?: string;
     salvageHistory?: string;
@@ -72,6 +74,25 @@ export type VehicleCheckData = {
     cost6Months?: string;
     co2Emissions?: string;
     co2EmissionBand?: string;
+  };
+  performance?: {
+    powerKw?: string;
+    powerBhp?: string;
+    maxSpeedMph?: string;
+    maxTorqueNm?: string;
+    maxTorqueRpm?: string;
+    zeroTo60Mph?: string;
+    torqueNm?: string;
+    maxSpeedKph?: string;
+  };
+  writeOffReport?: {
+    damageLocations?: unknown[];
+  };
+  previousKeepers?: {
+    keepers?: unknown[];
+  };
+  emissions?: {
+    co2Gkm?: string;
   };
   rawResponse?: Record<string, unknown>;
   pricingPlans?: VehiclePlan[];
