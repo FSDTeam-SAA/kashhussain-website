@@ -3,7 +3,6 @@ import { authOptions } from "@/lib/auth";
 import MileageInformationContainer from "./_components/mileage-information-container";
 import type { MotHistoryData } from "@/app/(website)/mot-history/_components/mot-history.types";
 import type { VehicleCheckData } from "@/app/(website)/vehicle-check/[regNumber]/_components/vehicle-check.types";
-import VehicleCheckExtraInformation from "@/app/(website)/vehicle-check/[regNumber]/_components/VehicleCheckExtraInformation";
 
 type PageProps = {
   searchParams: {
@@ -28,14 +27,12 @@ async function getMileageData(regNumber: string) {
         cache: "no-store",
       }).catch(() => null),
 
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/check-car/mot-history`, {
-        method: "POST",
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mot-history/registration/${encodeURIComponent(regNumber)}`, {
+        method: "GET",
         headers: {
           accept: "*/*",
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ registrationNumber: regNumber }),
         cache: "no-store",
       }).catch(() => null),
     ]);
@@ -56,7 +53,7 @@ async function getMileageData(regNumber: string) {
     if (motRes && motRes.ok) {
       const payload = await motRes.json();
       if (payload?.success) {
-        motHistory = payload?.data?.motHistory as MotHistoryData;
+        motHistory = payload?.data as MotHistoryData;
       }
     }
 
@@ -104,9 +101,7 @@ export default async function MileageInformationPage({ searchParams }: PageProps
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <MileageInformationContainer vehicle={vehicle} motHistory={motHistory} />
-      {vehicle && (
-        <VehicleCheckExtraInformation vehicle={vehicle} motHistory={motHistory} />
-      )}
+   
     </div>
   );
 }

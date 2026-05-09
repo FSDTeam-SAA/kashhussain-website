@@ -32,44 +32,15 @@ type DetailRow = {
 };
 
 type RawVehicleData = {
-  vehicle?: {
-    specification?: {
-      bhp?: string;
-      top_speed?: string;
-      acceleration?: string;
-      revenue_weight?: string;
-      engine_litres?: number;
-    };
-    running_costs?: {
-      mpg?: {
-        urban?: string;
-        extra_urban?: string;
-        combined?: string;
-      };
-    };
-    insurance?: {
-      group?: string;
-    };
-    emissions?: string;
+  registration?: {
+    co2Emissions?: string | number;
     tax?: {
-      message?: string;
-      ved_band?: string;
+      taxStatus?: string;
     };
     mot?: {
-      message?: string;
+      motStatus?: string;
     };
-    exported?: {
-      message?: string;
-    };
-    recalls?: {
-      message?: string;
-    };
-    ulez_compliance?: {
-      status?: string;
-    };
-    body_type?: string;
   };
-  data_source?: string;
 };
 
 const FALLBACK_VALUE = "N/A";
@@ -205,16 +176,18 @@ export default function VehicleCheckExtraInformation({
   const motHistorySummary = vehicle?.motHistory;
   const info = vehicle?.vehicleFlags;
   const roadTax = vehicle?.roadTax;
+  const apiPerformance = vehicle?.performance;
   const rawResponse = vehicle?.rawResponse as RawVehicleData | undefined;
-  const rawVehicle = rawResponse?.vehicle;
-  const performance = rawVehicle?.specification;
-  const fuelEconomy = rawVehicle?.running_costs?.mpg;
-  const insuranceGroup = rawVehicle?.insurance?.group;
-  const co2Value = roadTax?.co2Emissions || rawVehicle?.emissions;
-  const co2Band = roadTax?.co2EmissionBand || rawVehicle?.tax?.ved_band;
-  const dataSource = rawResponse?.data_source;
-  const exportedStatus = info?.exported || rawVehicle?.exported?.message;
-  const safetyRecallStatus = info?.safetyRecalls || rawVehicle?.recalls?.message;
+  const rawRegistration = rawResponse?.registration;
+  const co2Value =
+    roadTax?.co2Emissions ||
+    vehicle?.emissions?.co2Gkm ||
+    (rawRegistration?.co2Emissions !== undefined
+      ? String(rawRegistration.co2Emissions)
+      : undefined);
+  const co2Band = roadTax?.co2EmissionBand;
+  const exportedStatus = info?.exported;
+  const safetyRecallStatus = info?.safetyRecalls;
 
   const derivedMileage = useMemo(() => {
     let hasIssues = false;
@@ -239,7 +212,8 @@ export default function VehicleCheckExtraInformation({
     }
 
     return {
-      lastMotMileage: mileage?.lastMotMileage || null,
+      lastMotMileage:
+        mileage?.lastMotMileage || motHistory?.lastMileage?.toString() || null,
       mileageIssues: hasIssues ? "Yes" : mileage?.mileageIssues || "No",
       averageMileage: mileage?.averageMileage || null,
       estimatedCurrentMileage: mileage?.estimatedCurrentMileage || null,
@@ -296,7 +270,11 @@ export default function VehicleCheckExtraInformation({
                 <div className="bg-gray-50/80 p-5">
                   <p className="text-[12px] font-medium text-gray-500">Power</p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(performance?.bhp)}
+                    {formatValue(
+                      apiPerformance?.powerBhp
+                        ? `${apiPerformance.powerBhp} bhp`
+                        : null,
+                    )}
                   </p>
                 </div>
                 <div className="bg-gray-50/80 p-5">
@@ -304,7 +282,11 @@ export default function VehicleCheckExtraInformation({
                     Max Speed
                   </p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(performance?.top_speed)}
+                    {formatValue(
+                      apiPerformance?.maxSpeedMph
+                        ? `${apiPerformance.maxSpeedMph} mph`
+                        : null,
+                    )}
                   </p>
                 </div>
                 <div className="bg-gray-50/80 p-5">
@@ -312,7 +294,11 @@ export default function VehicleCheckExtraInformation({
                     Max Torque
                   </p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(insuranceGroup)}
+                    {formatValue(
+                      apiPerformance?.maxTorqueNm
+                        ? `${apiPerformance.maxTorqueNm} Nm`
+                        : null,
+                    )}
                   </p>
                 </div>
                 <div className="bg-gray-50/80 p-5">
@@ -320,7 +306,11 @@ export default function VehicleCheckExtraInformation({
                     Acceleration
                   </p>
                   <p className="mt-1 text-[13px] font-bold text-gray-900">
-                    {formatValue(performance?.acceleration)}
+                    {formatValue(
+                      apiPerformance?.zeroTo60Mph
+                        ? `${apiPerformance.zeroTo60Mph}s (0-60 mph)`
+                        : null,
+                    )}
                   </p>
                 </div>
               </div>
@@ -422,15 +412,21 @@ export default function VehicleCheckExtraInformation({
             >
               <TableRows
                 rows={[
-                  { label: "Engine Litres", value: performance?.engine_litres },
-                  { label: "Revenue Weight", value: performance?.revenue_weight },
+                  {
+                    label: "Power (kW)",
+                    value: apiPerformance?.powerKw
+                      ? `${apiPerformance.powerKw} kW`
+                      : null,
+                  },
+                  {
+                    label: "Max Speed (kph)",
+                    value: apiPerformance?.maxSpeedKph
+                      ? `${apiPerformance.maxSpeedKph} kph`
+                      : null,
+                  },
                   { label: "Type Approval", value: details?.typeApproval },
                   { label: "Wheel Plan", value: details?.wheelPlan },
-                  { label: "Body Type", value: details?.bodyStyle || rawVehicle?.body_type },
-                  {
-                    label: "Data Source",
-                    value: dataSource,
-                  },
+                  { label: "Body Type", value: details?.bodyStyle || details?.modelVariant },
                 ]}
               />
             </Panel>
@@ -570,17 +566,17 @@ export default function VehicleCheckExtraInformation({
                   {
                     label: "Urban",
                     subLabel: "Driving around towns and cities",
-                    value: fuelEconomy?.urban,
+                    value: "N/A",
                   },
                   {
                     label: "Extra Urban",
                     subLabel: "Driving in towns and on faster A-roads",
-                    value: fuelEconomy?.extra_urban,
+                    value: "N/A",
                   },
                   {
                     label: "Combined",
                     subLabel: "A mix of urban and extra urban driving",
-                    value: fuelEconomy?.combined,
+                    value: "N/A",
                   },
                 ]}
               />
@@ -662,11 +658,11 @@ export default function VehicleCheckExtraInformation({
             >
               <div className="space-y-5 px-1 py-3">
                 {[
-                  { label: "Tax Status", value: vehicle?.status?.taxStatus || rawVehicle?.tax?.message },
-                  { label: "MOT Status", value: vehicle?.status?.motStatus || rawVehicle?.mot?.message },
+                  { label: "Tax Status", value: vehicle?.status?.taxStatus || rawRegistration?.tax?.taxStatus },
+                  { label: "MOT Status", value: vehicle?.status?.motStatus || rawRegistration?.mot?.motStatus },
                   {
                     label: "ULEZ",
-                    value: details?.ulezCompliant || rawVehicle?.ulez_compliance?.status,
+                    value: details?.ulezCompliant,
                   },
                 ].map((rating, idx) => (
                   <div key={idx}>

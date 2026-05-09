@@ -30,16 +30,17 @@ async function getVehicleCheck(regNumber: string) {
         cache: "no-store",
       }).catch(() => null),
 
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/check-car/mot-history`, {
-        method: "POST",
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/mot-history/registration/${encodeURIComponent(regNumber)}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "*/*",
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
         },
-        body: JSON.stringify({ registrationNumber: regNumber }),
-        cache: "no-store",
-      }).catch(() => null)
+      ).catch(() => null),
     ]);
 
     let vehicle = null;
@@ -58,7 +59,7 @@ async function getVehicleCheck(regNumber: string) {
     if (motRes && motRes.ok) {
       const motPayload = await motRes.json();
       if (motPayload?.success) {
-        motHistory = motPayload?.data?.motHistory || null;
+        motHistory = motPayload?.data || null;
       }
     }
 
@@ -82,8 +83,6 @@ async function getVehicleCheck(regNumber: string) {
 export default async function VehicleCheckPage({ params }: PageProps) {
   const regNumber = decodeURIComponent(params.regNumber);
   const { vehicle, motHistory, errorMessage } = await getVehicleCheck(regNumber);
-
-  console.log("Mot check data:", motHistory)
 
   return (
     <div >

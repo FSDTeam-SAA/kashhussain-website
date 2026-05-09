@@ -57,6 +57,9 @@ export type MotHistoryVehicle = {
 };
 
 export type MotHistoryData = {
+  _id?: string | null;
+  user?: string | null;
+  checkCar?: string | null;
   registrationNumber?: string | null;
   make?: string | null;
   model?: string | null;
@@ -71,6 +74,10 @@ export type MotHistoryData = {
   latestTestResult?: string | null;
   latestExpiryDate?: string | null;
   lastMileage?: number | null;
+  mileageHistory?: unknown[] | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  __v?: number | null;
 };
 
 export type MotHistoryPayload = {
