@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { CheckCircle2, Clock3, ShieldAlert } from "lucide-react";
 
@@ -163,6 +164,25 @@ export default function VehicleCheckDetails({
     vehicleDetails?.bodyStyle ||
     vehicleDetails?.modelVariant ||
     FALLBACK_VALUE;
+
+  // Save vehicle & MOT data to localStorage for payment-success page
+  useEffect(() => {
+    if (vehicle) {
+      try {
+        localStorage.setItem("vehicleCheckData", JSON.stringify(vehicle));
+        localStorage.setItem("vehicleCheckReg", normalizedReg);
+      } catch (e) {
+        console.error("Failed to save vehicle check data:", e);
+      }
+    }
+    if (motHistory) {
+      try {
+        localStorage.setItem("motHistoryData", JSON.stringify(motHistory));
+      } catch (e) {
+        console.error("Failed to save MOT history data:", e);
+      }
+    }
+  }, [vehicle, motHistory, normalizedReg]);
 
   return (
     <>

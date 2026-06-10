@@ -92,6 +92,17 @@ export default function MotHistoryContainer({
 
         if (isMounted) {
           setData(normalizedData);
+          // Save MOT history to localStorage for payment-success page
+          try {
+            if (normalizedData?.motHistory) {
+              localStorage.setItem("motHistoryData", JSON.stringify(normalizedData.motHistory));
+            }
+            if (registrationNumber) {
+              localStorage.setItem("vehicleCheckReg", registrationNumber);
+            }
+          } catch (e) {
+            console.error("Failed to save MOT history data:", e);
+          }
         }
       } catch (error) {
         if (isMounted) {
