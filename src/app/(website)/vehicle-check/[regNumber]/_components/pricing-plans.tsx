@@ -210,7 +210,7 @@ export default function PricingSection() {
 
                     {/* Price */}
                     <h3 className="mt-2 text-[28px] font-bold leading-none tracking-[-0.02em] text-[#2647A5] sm:text-[42px]">
-                      ${plan.price.toFixed(2)}
+                      £{plan.price.toFixed(2)}
                     </h3>
 
                     {/* Features */}
